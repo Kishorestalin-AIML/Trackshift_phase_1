@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRACKSHIFT // Dynamic Constraint-Based F1 Energy & Race Decision Engine</title>
+  <meta name="description" content="Physics-grounded, constraint-first, rolling-horizon dynamic optimizer for F1 ERS energy control and race decision support.">
+
+  <!-- Google Fonts: Chakra Petch (Motorsport Headings) & JetBrains Mono (Telemetry) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./styles/trackshift.css">
+</head>
+<body>
+
+  <!-- Official Header Brand Bar -->
+  <header class="f1-header">
+    <div class="brand-section">
+      <div class="f1-badge">F1</div>
+      <div class="brand-titles">
+        <div class="brand-title">TRACKSHIFT <span>// AI DECISION TWIN</span></div>
+        <div class="brand-subtitle">DYNAMIC CONSTRAINT-BASED ERS ROLLING-HORIZON OPTIMIZER</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Circuit Selector -->
+      <select id="select-circuit" class="select-control" title="Select Circuit">
+        <option value="MONZA">MONZA (AUTODROMO NAZIONALE)</option>
+        <option value="SILVERSTONE">SILVERSTONE (GP CIRCUIT)</option>
+        <option value="SPA">SPA-FRANCORCHAMPS</option>
+      </select>
+
+      <!-- Scenario Selector (10 Scenarios) -->
+      <select id="select-scenario" class="select-control" style="border-color: var(--f1-yellow);" title="Select Scenario">
+        <option value="0">1. High Overtake / Low Counter-Risk (Case A)</option>
+        <option value="1">2. High Overtake / High Counter-Risk (Case D)</option>
+        <option value="2">3. Low Energy / Strong Future Opportunity (Case B)</option>
+        <option value="3">4. High Energy / Poor Current Opportunity</option>
+        <option value="4">5. Strong Future Harvest Ahead</option>
+        <option value="5">6. Weak Future Harvest Horizon</option>
+        <option value="6">7. Multiple Competing Overtake Windows</option>
+        <option value="7">8. Late-Race Energy Scarcity</option>
+        <option value="8">9. Defensive Situation (Defending P1)</option>
+        <option value="9">10. Constraint-Limited Deployment (FIA Cap)</option>
+      </select>
+
+      <!-- Simulation Playback Controls -->
+      <button id="btn-play-pause" class="btn btn-warning">STREAM LIVE</button>
+      <button id="btn-step" class="btn">STEP +</button>
+      <button id="btn-speed" class="btn">1.0X</button>
+      <button id="btn-reset" class="btn">RESET</button>
+
+      <!-- Modal & Drawer triggers -->
+      <button id="btn-benchmark" class="btn btn-primary">BENCHMARK BASELINES</button>
+      <button id="btn-settings" class="btn btn-cyan">REGULATIONS & WEIGHTS</button>
+    </div>
+  </header>
+
+  <!-- EXACT DECISION TIMESTAMP BANNER (Prompt Section 12) -->
+  <section class="decision-banner">
+    <!-- Block 1: Exact Moment -->
+    <div class="banner-block">
+      <div class="banner-label">DECISION TIMESTAMP</div>
+      <div class="banner-title-val" id="banner-lap">LAP 23</div>
+      <div class="banner-subdata">
+        <span>TIME: <strong id="banner-time">01:18.432</strong></span>
+        <span>DIST: <strong id="banner-dist">4,382 m</strong></span>
+      </div>
+      <div style="font-size: 0.65rem; color: var(--f1-cyan); font-weight: 700; margin-top: 3px;" id="banner-zone">
+        ATTACK STRAIGHT
+      </div>
+    </div>
+
+    <!-- Block 2: Current Vehicle State -->
+    <div class="banner-block highlight-cyan">
+      <div class="banner-label">ESTIMATED ERS STATE</div>
+      <div class="banner-title-val" style="color: var(--f1-cyan);" id="banner-ers">2.91 MJ</div>
+      <div class="banner-subdata">
+        <span>MGU-K: <strong id="banner-mguk">184 kW</strong></span>
+        <span>GAP: <strong id="banner-gap">0.82 s</strong></span>
+      </div>
+      <div class="banner-subdata">
+        <span>CLOSING: <strong id="banner-closing">+7.4 km/h</strong></span>
+      </div>
+    </div>
+
+    <!-- Block 3: Decision Engine Model Probabilities -->
+    <div class="banner-block highlight-yellow">
+      <div class="banner-label">DECISION ENGINE // MULTI-HORIZON</div>
+      <div class="banner-subdata" style="margin-top: 2px;">
+        <span>P(OVERTAKE): <strong style="color: var(--f1-green); font-size: 0.95rem;" id="banner-povertake">82%</strong></span>
+        <span>P(COUNTER): <strong style="color: var(--f1-red); font-size: 0.95rem;" id="banner-pcounter">17%</strong></span>
+      </div>
+      <div class="banner-subdata" style="margin-top: 4px;">
+        <span>REQ: <strong id="banner-ereq">0.72 MJ</strong></span>
+        <span>HARVEST: <strong style="color: var(--f1-green);" id="banner-eharvest">+0.21 MJ</strong></span>
+        <span>FUT VALUE: <strong style="color: var(--f1-yellow);" id="banner-futopp">0.76</strong></span>
+      </div>
+    </div>
+
+    <!-- Block 4: Optimal Control Output -->
+    <div class="banner-block highlight-red">
+      <div class="banner-label">OPTIMAL FEASIBLE CONTROL</div>
+      <div class="banner-title-val" style="color: #fff; font-size: 1.15rem;">
+        DEPLOY <span id="banner-deploy-power" style="color: var(--f1-red);">312 kW</span> FOR <span id="banner-deploy-dur">2.3 s</span>
+      </div>
+      <div class="banner-subdata">
+        <span>START: <strong>+0.4 s</strong></span>
+        <span>EST ENERGY COST: <strong id="banner-deploy-cost">0.72 MJ</strong></span>
+      </div>
+    </div>
+
+    <!-- Block 5: Final Human-Readable Recommendation -->
+    <div class="recommendation-pill" id="banner-pill">
+      <div class="pill-rec-code" id="banner-rec-code">DEPLOY NOW</div>
+      <div class="pill-rec-sub" id="banner-rec-sub">OPTIMAL STRIKE WINDOW ENGAGED</div>
+    </div>
+  </section>
+
+  <!-- Main Cockpit 3-Column Grid -->
+  <main class="dashboard-grid">
+
+    <!-- LEFT COLUMN: Cockpit Telemetry & Vehicle ERS State -->
+    <section class="f1-panel">
+      <div class="ca-tl corner-accent"></div><div class="ca-tr corner-accent"></div>
+      <div class="ca-bl corner-accent"></div><div class="ca-br corner-accent"></div>
+
+      <div class="panel-header">
+        <span>VEHICLE TELEMETRY</span>
+        <strong id="disp-position" style="color: var(--f1-yellow); font-family: var(--font-mono);">P2</strong>
+      </div>
+
+      <div class="panel-body">
+        <!-- Live Velocity & Powertrain Grid -->
+        <div class="telemetry-grid">
+          <div class="telemetry-cell active-cyan">
+            <label>SPEED</label>
+            <div class="val"><span id="disp-speed">314.5</span> <span class="unit">KM/H</span></div>
+          </div>
+          <div class="telemetry-cell active-yellow">
+            <label>CURRENT GEAR</label>
+            <div class="val" id="disp-gear">7</div>
+          </div>
+        </div>
+
+        <!-- Pedals Telemetry -->
+        <div class="gauge-box">
+          <div class="gauge-header">
+            <span>THROTTLE</span>
+            <span>100%</span>
+          </div>
+          <div class="gauge-bar-outer">
+            <div class="gauge-bar-inner bar-green" id="disp-throttle-bar" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="gauge-box">
+          <div class="gauge-header">
+            <span>BRAKE (KINETIC RECOVERY)</span>
+            <span>0%</span>
+          </div>
+          <div class="gauge-bar-outer">
+            <div class="gauge-bar-inner bar-red" id="disp-brake-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 12px 0;">
+
+        <!-- ESTIMATED ERS STATE (Explicitly labeled as required in Section 4) -->
+        <div style="font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--f1-cyan); font-weight: 700; margin-bottom: 8px;">
+          ESTIMATED ERS STATE // TELEMETRY DERIVED
+        </div>
+
+        <div class="gauge-box">
+          <div class="gauge-header">
+            <span>BATTERY STATE OF CHARGE (SOC)</span>
+            <span id="disp-soc-val" style="font-family: var(--font-mono); color: #fff;">72.8%</span>
+          </div>
+          <div class="gauge-bar-outer">
+            <div class="gauge-bar-inner bar-cyan" id="disp-soc-bar" style="width: 72.8%;"></div>
+          </div>
+        </div>
+
+        <div class="gauge-box">
+          <div class="gauge-header">
+            <span>CELL CORE TEMPERATURE</span>
+            <span id="disp-temp-val" style="font-family: var(--font-mono); color: var(--f1-yellow);">58.4°C</span>
+          </div>
+          <div class="gauge-bar-outer">
+            <div class="gauge-bar-inner bar-yellow" id="disp-temp-bar" style="width: 58.4%;"></div>
+          </div>
+        </div>
+
+        <div class="gauge-box">
+          <div class="gauge-header">
+            <span>LAP ELECTRICAL DEPLOYMENT (4.0 MJ CAP)</span>
+            <span id="disp-lap-deployed" style="font-family: var(--font-mono); color: var(--f1-red);">1.94 MJ</span>
+          </div>
+          <div class="gauge-bar-outer">
+            <div class="gauge-bar-inner bar-red" id="disp-quota-bar" style="width: 48.5%;"></div>
+          </div>
+        </div>
+
+        <div class="telemetry-grid" style="margin-top: 14px;">
+          <div class="telemetry-cell active-green">
+            <label>HARVESTED THIS LAP</label>
+            <div class="val" id="disp-lap-harvested" style="color: var(--f1-green);">+0.85 MJ</div>
+          </div>
+          <div class="telemetry-cell active-cyan">
+            <label>REGEN EFFICIENCY</label>
+            <div class="val">82% <span class="unit">η_regen</span></div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.65rem; color: var(--text-muted); line-height: 1.4; margin-top: 10px; background: rgba(0,0,0,0.3); padding: 6px 8px; border-radius: 3px;">
+          <strong>NOTE:</strong> Energy values represent observable telemetry approximations ($\Delta E_k = 0.5m(v_1^2 - v_2^2)$ and $\int P dt$), strictly non-confidential.
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER COLUMN: Interactive 2D Circuit Map + Multi-Horizon Windows + Split Charts -->
+    <section class="center-column">
+
+      <!-- Interactive 2D Circuit Viewport -->
+      <div class="track-viewport-wrapper">
+        <div class="ca-tl corner-accent"></div><div class="ca-tr corner-accent"></div>
+        <div class="ca-bl corner-accent"></div><div class="ca-br corner-accent"></div>
+
+        <div class="track-hud-overlay">
+          <div class="hud-pill">
+            <span>CIRCUIT TWIN:</span>
+            <strong id="hud-circuit-name">MONZA AUTODROMO // GP CONFIG</strong>
+          </div>
+          <div class="hud-pill">
+            <span>SECTOR CLASSIFICATION:</span>
+            <span style="color: var(--f1-cyan);">DYNAMIC TELEMETRY STREAM</span>
+          </div>
+        </div>
+
+        <canvas id="track-canvas"></canvas>
+      </div>
+
+      <!-- Multi-Horizon Upcoming Tactical Windows (Sections 6 & 7) -->
+      <div>
+        <div style="font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between;">
+          <span>MULTI-HORIZON TACTICAL LOOKAHEAD (CURRENT → +4 ZONES)</span>
+          <span style="color: var(--f1-yellow);">ROLLING-HORIZON EVALUATION</span>
+        </div>
+        <div class="future-windows-strip" id="future-windows-strip">
+          <!-- Populated dynamically by App.js -->
+        </div>
+      </div>
+
+      <!-- Split Power & Trajectory Charts (Sections 14 & 15) -->
+      <div class="charts-split">
+        <!-- Power Utilization Graph -->
+        <div class="chart-card">
+          <div class="panel-header">
+            <span>MGU-K POWER TRAJECTORY (kW)</span>
+            <span style="color: var(--f1-yellow); font-family: var(--font-mono);">0 → 350 kW LIMIT</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="power-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Multi-Horizon Energy Trajectory Graph -->
+        <div class="chart-card">
+          <div class="panel-header">
+            <span>FUTURE ENERGY TRAJECTORY (MJ)</span>
+            <span style="color: var(--f1-cyan); font-family: var(--font-mono);">MULTI-POLICY EVALUATION</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="trajectory-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: Decision Explainer & Historical Lap Log -->
+    <section class="f1-panel">
+      <div class="ca-tl corner-accent"></div><div class="ca-tr corner-accent"></div>
+      <div class="ca-bl corner-accent"></div><div class="ca-br corner-accent"></div>
+
+      <div class="panel-header">
+        <span>AI DECISION EXPLAINABILITY</span>
+        <span style="color: var(--f1-green); font-family: var(--font-mono);">FEASIBLE // RANK 1</span>
+      </div>
+
+      <div class="panel-body">
+        <!-- Explainer Checklist Container (Section 16) -->
+        <div id="explainer-container">
+          <!-- Populated by DecisionExplainer.js -->
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 14px 0;">
+
+        <!-- Historical Decision Log & Time Travel (Sections 13 & 23) -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">
+            LAP-BY-LAP DECISION HISTORY
+          </div>
+          <span style="font-size: 0.62rem; color: var(--f1-cyan); font-family: var(--font-mono);">CLICK ROW TO TIME-TRAVEL</span>
+        </div>
+
+        <div class="history-table-container">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>LAP</th>
+                <th>TIME</th>
+                <th>ZONE</th>
+                <th>P(OV)</th>
+                <th>P(CT)</th>
+                <th>ERS</th>
+                <th>POWER</th>
+                <th>CONTROL</th>
+                <th>RESULT</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BASELINE BENCHMARK COMPARISON MODAL (Section 21) -->
+  <div class="modal-overlay" id="modal-benchmark">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="font-weight: 800; font-size: 1.1rem; letter-spacing: 2px;">
+          STRATEGY BENCHMARK // TRACKSHIFT VS STATIC BASELINES
+        </div>
+        <button id="modal-benchmark-close" class="btn" style="padding: 4px 10px;">✕ CLOSE</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Compare TrackShift's dynamic rolling-horizon optimizer against simplistic industry threshold strategies.
+          </div>
+          <button id="btn-run-stint" class="btn btn-warning">RUN 5-LAP STINT SIMULATION</button>
+        </div>
+        <div id="benchmark-results">
+          <!-- Populated by runBenchmark() in App.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS & 2026 TECHNICAL REGULATIONS DRAWER -->
+  <div class="drawer" id="drawer-settings">
+    <div class="modal-header">
+      <div style="font-weight: 800; font-size: 0.95rem; letter-spacing: 1.5px;">
+        OBJECTIVE WEIGHTS & 2026 REGS
+      </div>
+      <button id="drawer-close" class="btn" style="padding: 4px 10px;">✕</button>
+    </div>
+    <div style="padding: 16px; overflow-y: auto; flex: 1;">
+      <div style="font-size: 0.72rem; color: var(--f1-yellow); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;">
+        OBJECTIVE FUNCTION COEFFICIENTS J(a):
+      </div>
+
+      <!-- V_gain -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>V_gain (Overtake Success Weight)</span>
+          <strong id="val-vgain">1.4</strong>
+        </div>
+        <input type="range" id="slider-vgain" min="0.5" max="3.0" step="0.1" value="1.4">
+      </div>
+
+      <!-- V_loss -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>V_loss (Counter-Attack Risk Penalty)</span>
+          <strong id="val-vloss">1.2</strong>
+        </div>
+        <input type="range" id="slider-vloss" min="0.5" max="3.0" step="0.1" value="1.2">
+      </div>
+
+      <!-- lambda_E -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>λ_E (Energy Depletion Penalty)</span>
+          <strong id="val-lambdae">0.85</strong>
+        </div>
+        <input type="range" id="slider-lambdae" min="0.2" max="2.5" step="0.05" value="0.85">
+      </div>
+
+      <!-- lambda_F -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>λ_F (Future Opportunity Loss Penalty)</span>
+          <strong id="val-lambdaf">1.1</strong>
+        </div>
+        <input type="range" id="slider-lambdaf" min="0.2" max="2.5" step="0.05" value="1.1">
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 16px 0;">
+
+      <div style="font-size: 0.72rem; color: var(--f1-red); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;">
+        2026 / FIA TECHNICAL CONSTRAINTS:
+      </div>
+
+      <!-- Max Power -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>MAX PERMITTED MGU-K POWER</span>
+          <strong id="val-maxpower">350 kW</strong>
+        </div>
+        <input type="range" id="slider-maxpower" min="120" max="400" step="10" value="350">
+      </div>
+
+      <!-- Max Lap Energy -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>MAX DEPLOYMENT PER LAP</span>
+          <strong id="val-maxlapenergy">4.0 MJ</strong>
+        </div>
+        <input type="range" id="slider-maxlapenergy" min="2.0" max="6.0" step="0.2" value="4.0">
+      </div>
+
+      <div style="font-size: 0.65rem; color: var(--text-muted); line-height: 1.4; margin-top: 16px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 3px;">
+        Modifying any weight or technical limit triggers an immediate re-optimization cycle across the rolling horizon.
+      </div>
+    </div>
+  </div>
+
+  <!-- Main ES Module Script -->
+  <script type="module" src="./src/ui/App.js"></script>
+</body>
+</html>
