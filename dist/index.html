@@ -1,439 +1,1466 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRACKSHIFT // Dynamic Constraint-Based F1 Energy & Race Decision Engine</title>
-  <meta name="description" content="Physics-grounded, constraint-first, rolling-horizon dynamic optimizer for F1 ERS energy control and race decision support.">
+  <title>ALPINE — Energy &amp; Overtake Decision Digital Twin</title>
+  <meta name="description"
+    content="Dynamic F1 2026 Energy &amp; Overtake Decision Digital Twin for Alpine. Finite energy optimization across zones, sectors, and multi-lap horizons under configurable FIA 2026 regulations.">
 
-  <!-- Google Fonts: Chakra Petch (Motorsport Headings) & JetBrains Mono (Telemetry) -->
+  <!-- Motorsport Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
-  <script type="module" crossorigin src="/assets/index-DTXqKuC5.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-npXTT8IL.css">
+  <script type="module" crossorigin src="/assets/index-JBg0aEL0.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-sM39AnPH.css">
 </head>
-<body>
 
-  <!-- Official Header Brand Bar -->
-  <header class="f1-header">
-    <div class="brand-section">
-      <div class="f1-badge">F1</div>
-      <div class="brand-titles">
-        <div class="brand-title">TRACKSHIFT <span>// AI DECISION TWIN</span></div>
-        <div class="brand-subtitle">DYNAMIC CONSTRAINT-BASED ERS ROLLING-HORIZON OPTIMIZER</div>
+<body class="alpine-body">
+
+  <div class="alpine-console-container">
+
+    <!-- Top Navigation / Brand Header -->
+    <header class="alpine-header">
+      <div class="header-left">
+        <div class="brand-logo-group">
+          <span class="brand-name">ALPINE</span>
+          <span class="brand-tricolor"></span>
+        </div>
+        <div class="brand-titles">
+          <h1 class="brand-title">ENERGY DEPLOYMENT DIGITAL TWIN</h1>
+          <span class="brand-subtitle">F1 2026 MULTI-LAP FINITE ENERGY &amp; OVERTAKE DECISION INTELLIGENCE</span>
+        </div>
       </div>
+      <div class="header-right">
+        <button class="btn-demo-preset" id="btn-demo-preset" title="Load Reference Evaluation Scenario">
+          ⚡ DEMO PRESET (L24 / 3 LAPS / P3)
+        </button>
+        <span class="fia-legal-pill" id="header-fia-pill">FIA 2026: 350 kW MGU-K</span>
+      </div>
+    </header>
+
+    <!-- Two-Column Dashboard Layout (Section 16 & 17) -->
+    <div class="twin-dashboard-layout">
+
+      <!-- LEFT COLUMN: RACE CONTROL (30-35% width, fixed/sticky) -->
+      <aside class="left-control-panel">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <span class="panel-icon">🎛️</span>
+            <h2 class="panel-title">RACE CONTROL</h2>
+          </div>
+          <span class="panel-badge">8 INPUTS</span>
+        </div>
+
+        <div class="controls-vertical-stack">
+          <!-- 1. Current Lap Slider -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label for="slider-current-lap">CURRENT LAP</label>
+              <span class="ctrl-val text-blue" id="val-current-lap">LAP 24 / 57</span>
+            </div>
+            <input type="range" class="alpine-slider" id="slider-current-lap" min="1" max="57" step="1" value="24">
+            <div class="slider-scale">
+              <span>LAP 1</span>
+              <span>LAP 28</span>
+              <span>LAP 57</span>
+            </div>
+          </div>
+
+          <!-- 2. Laps Remaining Slider -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label for="slider-laps-remaining">LAPS REMAINING</label>
+              <span class="ctrl-val text-blue" id="val-laps-remaining">33 LAPS REMAINING</span>
+            </div>
+            <input type="range" class="alpine-slider" id="slider-laps-remaining" min="1" max="56" step="1" value="33">
+            <div class="slider-scale">
+              <span>1 LAP (FINAL)</span>
+              <span>28 LAPS</span>
+              <span>56 LAPS</span>
+            </div>
+          </div>
+
+          <!-- 3. Position Selector P1 - P6 -->
+          <div class="ctrl-cell pos-cell">
+            <div class="ctrl-header">
+              <label>POSITION</label>
+              <span class="ctrl-hint">P1 DEFEND | P2-P5 ATTACK</span>
+            </div>
+            <div class="pos-selector-group" id="pos-selector-group">
+              <button class="pos-pill" data-position="1">P1</button>
+              <button class="pos-pill" data-position="2">P2</button>
+              <button class="pos-pill active" data-position="3">P3</button>
+              <button class="pos-pill" data-position="4">P4</button>
+              <button class="pos-pill" data-position="5">P5</button>
+              <button class="pos-pill" data-position="6">P6</button>
+            </div>
+          </div>
+
+          <!-- 4. Battery SOC Slider (Section 2 & 20) -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label for="slider-soc">BATTERY SOC (SIMULATED)</label>
+              <span class="ctrl-val text-blue" id="val-soc">62% (12.4 MJ)</span>
+            </div>
+            <input type="range" class="alpine-slider" id="slider-soc" min="0" max="100" step="1" value="62">
+            <div class="slider-scale">
+              <span class="text-red">0% (DEPLETED)</span>
+              <span class="text-amber">15% (FLOOR)</span>
+              <span>40%</span>
+              <span>62%</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <!-- 5. Car Ahead Gap Slider -->
+          <div class="ctrl-cell" id="ctrl-car-ahead-row">
+            <div class="ctrl-header">
+              <label for="slider-car-ahead">CAR AHEAD GAP</label>
+              <span class="ctrl-val text-green" id="val-car-ahead">0.7 s</span>
+            </div>
+            <input type="range" class="alpine-slider" id="slider-car-ahead" min="0.2" max="3.0" step="0.1" value="0.7">
+            <div class="slider-scale">
+              <span class="text-green">0.2s (ATTACK)</span>
+              <span>1.5s</span>
+              <span>3.0s (COAST)</span>
+            </div>
+          </div>
+
+          <!-- 6. Car Behind Gap Slider -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label for="slider-car-behind">CAR BEHIND GAP</label>
+              <span class="ctrl-val text-blue" id="val-car-behind">1.4 s</span>
+            </div>
+            <input type="range" class="alpine-slider" id="slider-car-behind" min="0.2" max="3.0" step="0.1" value="1.4">
+            <div class="slider-scale">
+              <span class="text-red">&lt; 0.5s PRESSURE</span>
+              <span>1.4s (SAFE)</span>
+              <span>3.0s</span>
+            </div>
+          </div>
+
+          <!-- 7. Deployment Intensity Slider -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label for="slider-intensity">DEPLOYMENT INTENSITY</label>
+              <span class="ctrl-val text-blue" id="val-intensity">320 kW (LEGAL)</span>
+            </div>
+            <input type="range" class="alpine-slider" id="slider-intensity" min="0" max="100" step="1" value="75">
+            <div class="slider-scale">
+              <span>SAVE</span>
+              <span>BALANCED</span>
+              <span>ATTACK (350 kW)</span>
+            </div>
+          </div>
+
+          <!-- 8. Constraint Level Slider (Section 23) -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label for="slider-constraint">CONSTRAINT LEVEL</label>
+              <span class="ctrl-val text-blue" id="val-constraint">LOW (25%)</span>
+            </div>
+            <input type="range" class="alpine-slider" id="slider-constraint" min="0" max="100" step="5" value="25">
+            <div class="slider-scale">
+              <span>LOW (ATTACK)</span>
+              <span>MEDIUM</span>
+              <span class="text-amber">HIGH (CONSERVE)</span>
+            </div>
+          </div>
+
+          <!-- 9. TYRE STATE Controls (Sections 30, 33, 34, 42, 46) -->
+          <div class="ctrl-section-divider">
+            <span class="divider-title">TYRE STATE &amp; ENVIRONMENT</span>
+          </div>
+
+          <!-- Compound Selector -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label>TYRE COMPOUND</label>
+              <span class="ctrl-val text-blue" id="val-tyre-compound">MEDIUM (C3)</span>
+            </div>
+            <div class="compound-selector-group" id="compound-selector-group">
+              <button class="compound-pill soft" data-compound="SOFT">SOFT</button>
+              <button class="compound-pill medium active" data-compound="MEDIUM">MEDIUM</button>
+              <button class="compound-pill hard" data-compound="HARD">HARD</button>
+              <button class="compound-pill inter" data-compound="INTERMEDIATE">INTER</button>
+              <button class="compound-pill wet" data-compound="WET">WET</button>
+            </div>
+          </div>
+
+          <!-- Tyre Age Slider -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label for="slider-tyre-age">TYRE AGE</label>
+              <span class="ctrl-val text-blue" id="val-tyre-age">12 LAPS</span>
+            </div>
+            <input type="range" class="alpine-slider" id="slider-tyre-age" min="0" max="40" step="1" value="12">
+            <div class="slider-scale">
+              <span>0 (NEW)</span>
+              <span>15</span>
+              <span>28 (CLIFF)</span>
+              <span>40</span>
+            </div>
+          </div>
+
+          <!-- Track / Weather Condition -->
+          <div class="ctrl-cell">
+            <div class="ctrl-header">
+              <label>TRACK CONDITION</label>
+              <span class="ctrl-val text-blue" id="val-track-condition">DRY (34°C)</span>
+            </div>
+            <div class="condition-selector-group" id="condition-selector-group">
+              <button class="condition-pill active" data-condition="DRY">DRY</button>
+              <button class="condition-pill" data-condition="DAMP">DAMP</button>
+              <button class="condition-pill" data-condition="WET">WET</button>
+            </div>
+          </div>
+
+          <!-- 10. PIT STRATEGY SUMMARY (Section 46) -->
+          <div class="ctrl-section-divider">
+            <span class="divider-title">PIT STRATEGY [AUTO]</span>
+          </div>
+
+          <div class="pit-strategy-summary-card">
+            <div class="pit-summary-row">
+              <div class="pit-summary-item">
+                <span class="psi-lbl">PLANNED STOP</span>
+                <strong class="psi-val text-blue" id="sb-pit-planned">LAP 28</strong>
+              </div>
+              <div class="pit-summary-item">
+                <span class="psi-lbl">PIT WINDOW</span>
+                <strong class="psi-val text-blue" id="sb-pit-window">LAP 27–29</strong>
+              </div>
+            </div>
+            <div class="pit-summary-row">
+              <div class="pit-summary-item">
+                <span class="psi-lbl">NEXT TYRE</span>
+                <strong class="psi-val text-green" id="sb-pit-next-tyre">HARD (C1)</strong>
+              </div>
+              <div class="pit-summary-item">
+                <span class="psi-lbl">PIT LOSS</span>
+                <strong class="psi-val text-amber" id="sb-pit-loss">+21.4s (P3→P8)</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compact CURRENT STATE Card (Section 16, 46) -->
+        <div class="current-state-card">
+          <div class="cs-header">
+            <span class="cs-title">CURRENT STATE</span>
+            <span class="cs-live-dot"></span>
+          </div>
+          <div class="cs-grid">
+            <div class="cs-item">
+              <span class="cs-label">LAP</span>
+              <strong class="cs-val text-blue" id="cs-lap">24</strong>
+            </div>
+            <div class="cs-item">
+              <span class="cs-label">POSITION</span>
+              <strong class="cs-val text-blue" id="cs-pos">P3</strong>
+            </div>
+            <div class="cs-item">
+              <span class="cs-label">SOC</span>
+              <strong class="cs-val text-blue" id="cs-soc">62%</strong>
+            </div>
+            <div class="cs-item">
+              <span class="cs-label">ENERGY</span>
+              <strong class="cs-val text-mono text-blue" id="cs-energy">12.4 MJ</strong>
+            </div>
+            <div class="cs-item">
+              <span class="cs-label">TYRE</span>
+              <strong class="cs-val text-blue" id="cs-tyre">MED (12L)</strong>
+            </div>
+            <div class="cs-item">
+              <span class="cs-label">GRIP / DEG</span>
+              <strong class="cs-val text-green" id="cs-grip">70% (LOW)</strong>
+            </div>
+            <div class="cs-item">
+              <span class="cs-label">AHEAD</span>
+              <strong class="cs-val text-green" id="cs-ahead">0.7 s</strong>
+            </div>
+            <div class="cs-item">
+              <span class="cs-label">BEHIND</span>
+              <strong class="cs-val text-blue" id="cs-behind">1.4 s</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulation Trigger Button -->
+        <div class="control-actions">
+          <button class="btn-run-simulation" id="btn-run-simulation">
+            ▶ RUN ENERGY SIMULATION
+          </button>
+        </div>
+
+        <!-- Live Status Banner -->
+        <div class="sim-status" id="simulation-status-banner" style="display: none;">
+          Simulation ready.
+        </div>
+      </aside>
+
+      <!-- RIGHT COLUMN: DECISION / DIGITAL TWIN (65-70% width) -->
+      <main class="right-twin-panel">
+
+        <!-- Core Engineering Philosophy Banner (Section 27) -->
+        <div class="philosophy-banner">
+          <div class="philosophy-icon">⚡</div>
+          <div class="philosophy-content">
+            <blockquote class="philosophy-quote">
+              &ldquo;Don't spend finite energy where it is merely useful. Spend it where its race value is highest — while reserving enough energy for the next attack or defence opportunity.&rdquo;
+            </blockquote>
+            <div class="philosophy-subquote">
+              &ldquo;The engine does not ask only &lsquo;Can I attack now?&rsquo; It asks &lsquo;Is attacking now better than saving this energy for a higher-value opportunity later?&rsquo;&rdquo;
+            </div>
+          </div>
+        </div>
+
+        <!-- A. LIVE RECOMMENDATION CARD (Section 18) -->
+        <section class="decision-output-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">RECOMMENDED STRATEGY</h2>
+              <span class="meta-tag fia-tag">[FIA 2026 OPTIMIZED]</span>
+            </div>
+            <div class="score-badge-group">
+              <span class="strategy-score-badge">OPTIMIZATION SCORE: <strong id="dec-strategy-score">87/100</strong></span>
+            </div>
+          </div>
+
+          <div class="decision-card">
+            <!-- Top Row: WHAT (ENERGY + TYRE + PIT), WHEN, WHERE -->
+            <div class="decision-top-row">
+              <div class="strategy-callout">
+                <span class="kicker">CANDIDATE ACTION SELECTED [WHAT: ENERGY + TYRE + PIT]</span>
+                <div class="strategy-badge-wrapper">
+                  <span class="strategy-pill super-clip" id="recommended-strategy-badge" data-alt-id="dec-strategy-badge">SUPER-CLIP</span>
+                  <span class="strategy-pill tyre-action" id="dec-tyre-badge">TYRE: MEDIUM</span>
+                  <span class="strategy-pill pit-action" id="dec-pit-badge">PIT: STAY OUT</span>
+                  <span class="meta-tag sim-tag" id="out-fia" data-alt-id="dec-fia-status">LEGAL</span>
+                </div>
+              </div>
+
+              <div class="temporal-spatial-box">
+                <div class="when-where-item">
+                  <span class="meta-label">WHEN:</span>
+                  <strong class="meta-val text-blue" id="dec-when">LAP 24 (NEXT ZONE)</strong>
+                </div>
+                <div class="when-where-item">
+                  <span class="meta-label">WHERE:</span>
+                  <strong class="meta-val" id="out-where">SECTOR 2 — ZONE 5 (Main DRS Acceleration Straight)</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compact "WHY THIS STRATEGY?" Explanation (Section 2) -->
+            <div class="why-this-strategy-card" id="why-this-strategy-block">
+              <div class="strategy-4q-grid">
+                <div class="q-cell">
+                  <span class="q-tag">WHAT</span>
+                  <strong class="q-val text-blue" id="synth-what">SUPER-CLIP</strong>
+                </div>
+                <div class="q-cell">
+                  <span class="q-tag">WHERE</span>
+                  <strong class="q-val" id="synth-where">Sector 2 · Zone 5</strong>
+                </div>
+                <div class="q-cell">
+                  <span class="q-tag">WHEN</span>
+                  <strong class="q-val text-blue" id="synth-when">Lap 25</strong>
+                </div>
+                <div class="q-cell q-cell-why">
+                  <span class="q-tag">WHY</span>
+                  <span class="q-val-why" id="synth-why">High-value attack opportunity with sufficient free energy.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metric Grid (Section 18 & 47) -->
+            <div class="decision-params-grid">
+              <div class="dec-param-cell">
+                <span class="param-label">ENERGY DEPLOY</span>
+                <strong class="param-val text-blue" id="out-energy">Deploy: 1.40 MJ</strong>
+                <span class="param-tag sim-tag">[CALCULATED]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">EXPECTED RECOVERY</span>
+                <strong class="param-val text-green" id="out-recovery">Next recovery: +0.80 MJ (Z6)</strong>
+                <span class="param-tag sim-tag" id="dec-recovery-dist">[1 ZONE AWAY]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">ENERGY BEFORE → AFTER</span>
+                <strong class="param-val text-mono" id="dec-energy-flow">12.40 → 11.00 MJ</strong>
+                <span class="param-tag sim-tag">[SIMULATED]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">SOC SHIFT</span>
+                <strong class="param-val text-mono" id="out-after-energy">55% (62% → 55%)</strong>
+                <span class="param-tag sim-tag">[ESTIMATED]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">TYRE CONDITION</span>
+                <strong class="param-val text-blue" id="dec-tyre-cond">12 Laps | Grip 70% | LOW DEG</strong>
+                <span class="param-tag sim-tag">[TYRE MODEL]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">OPTIMAL PIT WINDOW</span>
+                <strong class="param-val text-blue" id="dec-pit-window">Lap 27–29 (Best: Lap 28)</strong>
+                <span class="param-tag sim-tag">[STRATEGY]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">CIRCUIT PIT LOSS</span>
+                <strong class="param-val text-amber" id="dec-pit-loss">+21.4s (Rejoin P8)</strong>
+                <span class="param-tag fia-tag">[SILVERSTONE]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">UNDERCUT POTENTIAL</span>
+                <strong class="param-val text-green" id="dec-undercut-val">+1.8s Gain (HIGH)</strong>
+                <span class="param-tag est-tag">[MODEL ESTIMATE]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">OVERTAKE PROBABILITY</span>
+                <strong class="param-val text-green" id="dec-overtake-prob">87%</strong>
+                <span class="param-tag est-tag">[SIGMOID MODEL]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">DEFENCE RISK</span>
+                <strong class="param-val text-blue" id="dec-defence-risk">LOW</strong>
+                <span class="param-tag sim-tag">[REAR DELTA]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">CURRENT RACE VALUE</span>
+                <strong class="param-val text-blue" id="dec-race-value">0.75</strong>
+                <span class="param-tag est-tag">[OBJECTIVE J(a)]</span>
+              </div>
+              <div class="dec-param-cell">
+                <span class="param-label">SPEND VS SAVE VERDICT</span>
+                <strong class="param-val text-green" id="dec-spend-vs-save">SPEND WINS +0.24</strong>
+                <span class="param-tag sim-tag" id="dec-best-future-opp">Lap 25 → Z5</span>
+              </div>
+            </div>
+
+            <!-- Recovery Timing & Sequence Strip (Section 7) -->
+            <div class="recovery-sequence-strip" id="recovery-sequence-strip">
+              <div class="seq-hdr">
+                <span class="seq-icon">⚡</span>
+                <strong class="seq-title">NEXT RECOVERY TIMING &amp; SEQUENCE:</strong>
+              </div>
+              <div class="seq-details" id="recovery-sequence-content">
+                <span class="seq-target" id="rec-timing-target"><strong>NEXT RECOVERY:</strong> <span class="text-green" id="rec-timing-loc">Sector 2 · Zone 6</span> · <span id="rec-timing-dist">1 zone away</span> · <span class="text-green" id="rec-timing-exp">Expected recovery: +0.80 MJ</span></span>
+                <span class="seq-arrow-flow" id="rec-seq-flow">Current attack → energy spent → remaining energy → next recovery → future attack</span>
+              </div>
+            </div>
+
+            <!-- UPCOMING LAP ENERGY DIRECTIVE & CONSTRAINT ADVISORY (SAVE / USE / HARVEST) -->
+            <div class="upcoming-lap-directive-card" id="upcoming-lap-directive-card">
+              <div class="directive-top-bar">
+                <div class="dir-title-group">
+                  <span class="dir-kicker" id="dir-lap-kicker">UPCOMING LAP 25 TACTICAL DIRECTIVE</span>
+                  <div class="dir-badge-row">
+                    <span class="directive-badge directive-use" id="dir-type-badge">USE (DEPLOY)</span>
+                    <span class="best-pick-pill" id="dir-best-pick-pill">BEST PICK: <strong id="dir-best-pick-name">SUPER-CLIP</strong></span>
+                  </div>
+                </div>
+                <div class="dir-net-energy-group">
+                  <span class="net-lbl">UPCOMING PROJECTION:</span>
+                  <strong class="net-val text-green" id="dir-net-energy-val">Start 11.0 MJ (SOC 55%) · Net -0.60 MJ</strong>
+                </div>
+              </div>
+
+              <div class="directive-body-box">
+                <div class="dir-constraints-row">
+                  <span class="dir-constraints-hdr">ACTIVE CONSTRAINTS:</span>
+                  <div class="dir-chips-container" id="dir-constraint-chips">
+                    <span class="d-chip chip-green">C1: Free Energy Available (8.3 MJ)</span>
+                    <span class="d-chip chip-green">C5: Attack Window Open (0.7s)</span>
+                    <span class="d-chip chip-blue">C13: High Performance Sweet Spot</span>
+                  </div>
+                </div>
+
+                <p class="dir-explanation-text" id="dir-explanation-text">
+                  Upcoming Lap 25 requires USE: Free energy (8.3 MJ) is cleared for discretionary attack without compromising defensive reserve. Deploying SUPER-CLIP on the primary straight maximizes expected position gain (+0.42s).
+                </p>
+
+                <!-- 4-Way Action Evaluation for Upcoming Lap -->
+                <div class="dir-four-picks-grid" id="dir-four-picks-grid">
+                  <div class="dir-pick-cell pick-best" id="pick-cell-superclip">
+                    <div class="pick-cell-top">
+                      <span class="pick-name">SUPER-CLIP</span>
+                      <span class="pick-verdict text-green" id="pick-verd-superclip">✓ BEST PICK</span>
+                    </div>
+                    <span class="pick-reason" id="pick-reas-superclip">Optimal high-discharge attack (+0.42s) cleared by free energy.</span>
+                  </div>
+                  <div class="dir-pick-cell" id="pick-cell-normal">
+                    <div class="pick-cell-top">
+                      <span class="pick-name">NORMAL</span>
+                      <span class="pick-verdict text-muted" id="pick-verd-normal">SUB-OPTIMAL</span>
+                    </div>
+                    <span class="pick-reason" id="pick-reas-normal">Moderate pace traversal; does not maximize high-value attack window.</span>
+                  </div>
+                  <div class="dir-pick-cell" id="pick-cell-coast">
+                    <div class="pick-cell-top">
+                      <span class="pick-name">COAST</span>
+                      <span class="pick-verdict text-amber" id="pick-verd-coast">SAVE (FEASIBLE)</span>
+                    </div>
+                    <span class="pick-reason" id="pick-reas-coast">Conserves pack, but forfeits high-value track delta opportunity.</span>
+                  </div>
+                  <div class="dir-pick-cell" id="pick-cell-harvest">
+                    <div class="pick-cell-top">
+                      <span class="pick-name">BRAKING/HARVEST</span>
+                      <span class="pick-verdict text-blue" id="pick-verd-harvest">HARVEST ACTIVE</span>
+                    </div>
+                    <span class="pick-reason" id="pick-reas-harvest">Regen captures +0.80 MJ in heavy braking zones.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rationale Row: WHY (Section 1, 18, 45) -->
+            <div class="rationale-box">
+              <div class="rationale-header">
+                <span class="rationale-icon">📋</span>
+                <strong class="rationale-title">ENGINEERING RATIONALE [WHY]:</strong>
+              </div>
+              <p class="rationale-text" id="out-reason">
+                High-value attack zone with sufficient free energy (8.3 MJ). Next recovery opportunity replenishes +0.80 MJ in Z6. Reserve remains sufficient for the next defensive requirement.
+              </p>
+            </div>
+
+            <!-- "WHY THIS ZONE?" Rationale -->
+            <div class="why-zone-box">
+              <div class="why-zone-header">
+                <span class="why-icon">🎯</span>
+                <strong class="why-title">WHY THIS ZONE? [ZONE PERFORMANCE POTENTIAL]:</strong>
+              </div>
+              <p class="why-zone-text" id="out-why-zone">
+                ZONE 5 selected: Performance potential 96/100 + favorable car ahead gap (0.7s) + recovery opportunity immediately afterward in Z6 (+0.80 MJ).
+              </p>
+            </div>
+
+            <!-- Compact "WHY NOT?" Section (Section 10) -->
+            <div class="why-comparative-panel" id="why-comparative-panel">
+              <div class="why-comp-col why-this-col">
+                <div class="why-comp-hdr text-green">
+                  <span class="comp-icon">✓</span> WHY THIS?
+                </div>
+                <ul class="why-comp-list" id="list-why-this">
+                  <li>✓ High immediate race value</li>
+                  <li>✓ Sufficient free energy (8.3 MJ)</li>
+                  <li>✓ Low defence pressure from behind</li>
+                </ul>
+              </div>
+              <div class="why-comp-col why-not-col">
+                <div class="why-comp-hdr text-amber">
+                  <span class="comp-icon">✕</span> WHY NOT OTHERS?
+                </div>
+                <ul class="why-comp-list" id="list-why-not-others">
+                  <li><strong>NORMAL</strong> — lower expected position gain</li>
+                  <li><strong>COAST</strong> — current opportunity is too valuable to ignore</li>
+                  <li><strong>HARVEST</strong> — recovery value is lower than attack value</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- B. RACE ANIMATION: 3-CAR HORIZONTAL STRIP (Section 24) -->
+        <section class="alpine-track-section">
+          <div class="track-header-bar">
+            <div class="track-legends">
+              <span class="track-legend"><span class="legend-dot behind"></span> CAR BEHIND</span>
+              <span class="track-legend main"><span class="legend-dot user"></span> ALPINE F1 (MY CAR)</span>
+              <span class="track-legend ahead"><span class="legend-dot ahead"></span> CAR AHEAD</span>
+            </div>
+            <div class="track-status-pill" id="track-live-mode">
+              LIVE HORIZONTAL RACE STRIP
+            </div>
+          </div>
+
+          <div class="canvas-box">
+            <canvas id="alpine-track-canvas"></canvas>
+          </div>
+        </section>
+
+        <!-- C. ENERGY STATE & TRI-SEGMENT BAR (Section 2 & 19) -->
+        <section class="energy-state-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">ENERGY STATE</h2>
+              <span class="meta-tag sim-tag">[SIMULATED / CALCULATED]</span>
+            </div>
+            <span class="section-hint">PRIMARY UNITS: MEGAJOULE (MJ) &amp; JOULE (J) | PACK CAPACITY: 20.0 MJ (20,000,000 J)</span>
+          </div>
+
+          <div class="energy-stats-grid">
+            <div class="stat-card">
+              <span class="stat-label">CURRENT SOC</span>
+              <strong class="stat-val text-blue" id="stat-soc">62%</strong>
+              <span class="stat-sub">Derived from MJ state</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">AVAILABLE ENERGY</span>
+              <strong class="stat-val text-blue" id="stat-available">12.4 MJ</strong>
+              <span class="stat-sub">SOC × 20.0 MJ (20,000,000 J)</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">RESERVED ENERGY</span>
+              <strong class="stat-val text-amber" id="stat-reserved">4.1 MJ</strong>
+              <span class="stat-sub">Safety + Def + Atk + Gap</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">FREE ENERGY</span>
+              <strong class="stat-val text-green" id="stat-free">8.3 MJ</strong>
+              <span class="stat-sub">Available - Reserved</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">AFTER ACTION</span>
+              <strong class="stat-val text-mono" id="stat-after-energy">11.0 MJ</strong>
+              <span class="stat-sub" id="stat-net-delta">Deploy: -1.40 MJ</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">SOC AFTER ACTION</span>
+              <strong class="stat-val text-mono" id="stat-after-soc">55%</strong>
+              <span class="stat-sub">Post-deployment state</span>
+            </div>
+          </div>
+
+          <!-- Tri-Segment Horizontal Energy Bar (USED | FREE | RESERVE) -->
+          <div class="tri-segment-container">
+            <div class="tri-bar-header">
+              <div class="tri-bar-title-group">
+                <span class="tri-bar-title">TRI-SEGMENT ELECTRICAL PACK ALLOCATION</span>
+                <span class="battery-state-badge healthy" id="battery-state-badge">ENERGY: HEALTHY</span>
+              </div>
+              <div class="tri-bar-legend">
+                <span class="legend-item"><span class="tri-swatch reserve"></span> RESERVE (<span id="leg-res-val">4.1 MJ</span>)</span>
+                <span class="legend-item"><span class="tri-swatch free"></span> FREE ENERGY (<span id="leg-free-val">8.3 MJ</span>)</span>
+                <span class="legend-item"><span class="tri-swatch used"></span> USED / DEPLETED (<span id="leg-used-val">7.6 MJ</span>)</span>
+              </div>
+            </div>
+
+
+            <!-- Visual Segregated Tri-Segment Horizontal Bar -->
+            <div class="tri-segment-bar" id="tri-segment-bar" title="Live Segregated Allocation: Reserve | Free | Used">
+              <div class="seg-reserve" id="bar-seg-reserve" style="width: 20.5%;" title="Reserved Energy Floor">
+                <span class="seg-label" id="label-seg-reserve">RESERVE 4.1 MJ (21%)</span>
+              </div>
+              <div class="seg-free" id="bar-seg-free" style="width: 41.5%;" title="Free Usable Energy">
+                <span class="seg-label" id="label-seg-free">FREE 8.3 MJ (41%)</span>
+              </div>
+              <div class="seg-used" id="bar-seg-used" style="width: 38.0%;" title="Used / Depleted Capacity">
+                <span class="seg-label" id="label-seg-used">USED 7.6 MJ (38%)</span>
+              </div>
+            </div>
+            <div class="finite-energy-fill" id="finite-battery-fill" style="display: none; width: 62%;"></div>
+
+            <!-- Ticks / Segregation Scale -->
+            <div class="tri-bar-ticks" id="tri-bar-ticks">
+              <span class="tick-mark">0 MJ (0%)</span>
+              <span class="tick-mark">5 MJ (25%)</span>
+              <span class="tick-mark">10 MJ (50%)</span>
+              <span class="tick-mark">15 MJ (75%)</span>
+              <span class="tick-mark">20 MJ (100%)</span>
+            </div>
+
+            <!-- Three Segregated Segment Telemetry Cards -->
+            <div class="tri-segregated-cards-grid" id="tri-segregated-cards-grid">
+              <div class="tri-seg-card reserve-card">
+                <div class="tri-card-header">
+                  <span class="tri-swatch reserve"></span>
+                  <span class="tri-card-name">RESERVE FLOOR</span>
+                </div>
+                <div class="tri-card-main">
+                  <strong class="tri-card-val text-amber" id="card-res-val">4.1 MJ</strong>
+                  <span class="tri-card-pct" id="card-res-pct">20.5%</span>
+                </div>
+                <div class="tri-card-desc">Safety floor (15%) + Defence (C6) + Future reserve</div>
+              </div>
+              <div class="tri-seg-card free-card">
+                <div class="tri-card-header">
+                  <span class="tri-swatch free"></span>
+                  <span class="tri-card-name">FREE ATTACK ENERGY</span>
+                </div>
+                <div class="tri-card-main">
+                  <strong class="tri-card-val text-green" id="card-free-val">8.3 MJ</strong>
+                  <span class="tri-card-pct" id="card-free-pct">41.5%</span>
+                </div>
+                <div class="tri-card-desc">Available for Super-Clip / Overtake (min 1.40 MJ)</div>
+              </div>
+              <div class="tri-seg-card used-card">
+                <div class="tri-card-header">
+                  <span class="tri-swatch used"></span>
+                  <span class="tri-card-name">DEPLETED HEADROOM</span>
+                </div>
+                <div class="tri-card-main">
+                  <strong class="tri-card-val text-muted" id="card-used-val">7.6 MJ</strong>
+                  <span class="tri-card-pct" id="card-used-pct">38.0%</span>
+                </div>
+                <div class="tri-card-desc">MGU-K kinetic braking recovery capacity headroom</div>
+              </div>
+            </div>
+
+            <!-- Live Attack Capability & Limitation Rationale (Sections 5, 8 & 9) -->
+            <div class="battery-capability-row" id="battery-capability-row">
+              <div class="capability-item">
+                <span class="cap-label">ATTACK CAPABILITY:</span>
+                <strong class="cap-val text-green" id="battery-attack-capability">SUPER-CLIP AVAILABLE (350 kW / 1.40 MJ)</strong>
+              </div>
+              <div class="capability-item limitation" id="battery-limit-box">
+                <span class="cap-sub" id="battery-limit-reason">Current: 12.4 MJ | Reserve: 4.1 MJ | Free Attack: 8.3 MJ &gt;= 1.40 MJ | STATUS: COMPLIANT</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- D. PIT STOP & TYRE STRATEGY ENGINE (Sections 29–42) -->
+        <section class="pit-tyre-cockpit-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">PIT STOP &amp; TYRE STRATEGY ENGINE</h2>
+              <span class="meta-tag fia-tag">[SECTIONS 29–42 OPTIMIZATION LAYER]</span>
+            </div>
+            <div class="sc-status-group">
+              <label class="vsc-toggle-label">
+                <input type="checkbox" id="chk-vsc-sc">
+                <span class="vsc-switch-slider"></span>
+                <span class="vsc-text">SAFETY CAR / VSC ACTIVE</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="cockpit-dual-grid">
+            <!-- Left: Pit Stop Loss Decomposition & Rejoining Position -->
+            <div class="cockpit-card">
+              <div class="cockpit-card-title">
+                <span>CIRCUIT PIT STOP TIME LOSS MODEL</span>
+                <span class="meta-tag sim-tag" id="pit-circuit-tag">SILVERSTONE: 21.4s LOSS</span>
+              </div>
+              <div class="pit-loss-breakdown-box">
+                <div class="loss-equation">
+                  <div class="loss-term">
+                    <span class="term-lbl">STATIONARY STOP</span>
+                    <strong class="term-val text-blue" id="val-stationary-stop">2.4 s</strong>
+                    <span class="term-sub">4-Wheel Tyre Change</span>
+                  </div>
+                  <div class="loss-plus">+</div>
+                  <div class="loss-term">
+                    <span class="term-lbl">PIT LANE TRAVEL</span>
+                    <strong class="term-val text-blue" id="val-travel-loss">19.0 s</strong>
+                    <span class="term-sub">Entry + Limit + Exit</span>
+                  </div>
+                  <div class="loss-equals">=</div>
+                  <div class="loss-term total">
+                    <span class="term-lbl">TOTAL STRATEGIC LOSS</span>
+                    <strong class="term-val text-amber" id="val-total-pit-loss">21.4 s</strong>
+                    <span class="term-sub" id="val-vsc-savings">Green Flag Standard</span>
+                  </div>
+                </div>
+
+                <div class="rejoin-prediction-row">
+                  <div class="rejoin-item">
+                    <span class="rejoin-lbl">CURRENT POSITION</span>
+                    <strong class="rejoin-val text-blue" id="rejoin-curr-pos">P3</strong>
+                  </div>
+                  <div class="rejoin-arrow">→</div>
+                  <div class="rejoin-item">
+                    <span class="rejoin-lbl">PREDICTED EXIT</span>
+                    <strong class="rejoin-val text-red" id="rejoin-exit-pos">P8</strong>
+                    <span class="rejoin-sub" id="rejoin-drop">Drops 5 positions (~4.2s/car density)</span>
+                  </div>
+                  <div class="rejoin-divider"></div>
+                  <div class="rejoin-item">
+                    <span class="rejoin-lbl">PACE RECOVERY</span>
+                    <strong class="rejoin-val text-green" id="rejoin-breakeven">15 LAPS</strong>
+                    <span class="rejoin-sub">Fresh rubber delta (+1.45s/lap)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Candidate Pit Decisions (Section 32) -->
+              <div class="candidate-pit-actions-box">
+                <div class="sub-box-title">5 CANDIDATE PIT ACTIONS EVALUATION (SECTION 32)</div>
+                <div class="pit-actions-grid" id="pit-actions-comparison-grid">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Tyre State, Undercut/Overcut & Available Inventory -->
+            <div class="cockpit-card">
+              <div class="cockpit-card-title">
+                <span>TYRE PERFORMANCE &amp; UNDERCUT/OVERCUT MODEL</span>
+                <span class="meta-tag fia-tag">FIA 2026 SET ALLOCATION</span>
+              </div>
+
+              <!-- Undercut vs Overcut Assessment -->
+              <div class="undercut-analysis-box">
+                <div class="undercut-metric-row">
+                  <div class="uc-metric-cell">
+                    <span class="uc-lbl">UNDERCUT POTENTIAL</span>
+                    <strong class="uc-val text-green" id="cockpit-undercut-gain">+1.8 s</strong>
+                    <span class="uc-tag high" id="cockpit-undercut-viability">VIABILITY: HIGH</span>
+                  </div>
+                  <div class="uc-metric-cell">
+                    <span class="uc-lbl">OVERCUT POTENTIAL</span>
+                    <strong class="uc-val text-blue" id="cockpit-overcut-gain">+0.3 s</strong>
+                    <span class="uc-tag low" id="cockpit-overcut-viability">VIABILITY: LOW</span>
+                  </div>
+                  <div class="uc-metric-cell">
+                    <span class="uc-lbl">OPTIMAL PIT WINDOW</span>
+                    <strong class="uc-val text-blue" id="cockpit-window-range">LAP 27–29</strong>
+                    <span class="uc-sub" id="cockpit-window-best">Best: Lap 28</span>
+                  </div>
+                </div>
+                <div class="uc-recommendation-banner" id="cockpit-undercut-summary">
+                  PIT NOW gives expected +1.8s undercut gain against degrading opponent tyres.
+                </div>
+              </div>
+
+              <!-- Tyre State Gauges -->
+              <div class="tyre-telemetry-row">
+                <div class="tyre-gauge-card">
+                  <span class="tg-label">GRIP / PERFORMANCE</span>
+                  <div class="tg-bar-wrap">
+                    <div class="tg-bar-fill" id="tg-grip-fill" style="width: 70%;"></div>
+                  </div>
+                  <div class="tg-val-row">
+                    <strong class="tg-val" id="tg-grip-val">70/100</strong>
+                    <span class="tg-sub" id="tg-deg-level">LOW DEG</span>
+                  </div>
+                </div>
+
+                <div class="tyre-gauge-card">
+                  <span class="tg-label">ESTIMATED TYRE TEMP</span>
+                  <div class="tg-bar-wrap">
+                    <div class="tg-bar-fill temp" id="tg-temp-fill" style="width: 68%;"></div>
+                  </div>
+                  <div class="tg-val-row">
+                    <strong class="tg-val text-amber" id="tg-temp-val">99°C</strong>
+                    <span class="tg-sub">Optimal: 95–105°C</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FIA 2026 Tyre Set Inventory (Section 35) -->
+              <div class="tyre-inventory-box">
+                <div class="sub-box-title">REMAINING TYRE SET INVENTORY (FIA 2026 ALLOCATION)</div>
+                <div class="inventory-badges-grid" id="tyre-inventory-badges">
+                  <!-- Populated dynamically -->
+                </div>
+                <div class="mandatory-compound-alert" id="mandatory-compound-status">
+                  ✓ Mandatory 2-Compound Rule: Currently on MEDIUM. Recommended next compound: HARD (C1).
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- E. 5-LAP TACTICAL STRATEGY PLAN (Section 48) -->
+        <section class="tactical-plan-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">5-LAP TACTICAL STRATEGY TIMELINE (ENERGY + TYRE + PIT COUPLING)</h2>
+              <span class="meta-tag sim-tag">[SECTION 48 MULTI-LAP RACE PLAN]</span>
+            </div>
+            <span class="section-hint">OPTIMIZER ANSWERS WHAT, WHEN, WHERE &amp; BOX TIMING SIMULTANEOUSLY</span>
+          </div>
+
+          <div class="tactical-plan-container" id="tactical-plan-container">
+            <!-- Populated dynamically by EnergyDeploymentApp.js -->
+          </div>
+        </section>
+
+        <!-- F. STRATEGY OPTIMIZATION (Section 13) -->
+        <section class="strategy-optimization-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">CANDIDATE ENERGY MANAGEMENT ACTIONS &amp; OPTIMIZER EVALUATION</h2>
+              <span class="meta-tag fia-tag">[ARGMAX OPTIMALITY]</span>
+            </div>
+            <span class="section-hint">OPTIMIZER EVALUATES ALL 4 CANDIDATE ACTIONS (SUPER-CLIP, NORMAL, COAST, HARVEST) &amp; SELECTS HIGHEST-VALUE LEGAL ACTION</span>
+          </div>
+
+          <!-- Strategy Operations Toolbar: Interactive Constraint Slider + Inspection Affordance -->
+          <div class="strat-operations-toolbar">
+            <div class="strat-slider-cell">
+              <div class="strat-slider-header">
+                <div class="strat-slider-title-group">
+                  <span class="strat-slider-label">FIA &amp; ENGINE CONSTRAINT LEVEL</span>
+                  <span class="strat-slider-sub">DIRECT OPTIMIZATION DERATING &amp; REASONING BIAS</span>
+                </div>
+                <span id="val-strategy-constraint" class="ctrl-val text-blue">LOW (25%)</span>
+              </div>
+              <input
+                type="range"
+                id="slider-strategy-constraint"
+                class="alpine-slider"
+                min="0"
+                max="100"
+                value="25"
+                step="1"
+                aria-label="Strategy Constraint Level Slider"
+              />
+              <div class="slider-scale">
+                <span>0% (AGGRESSIVE / 350 kW)</span>
+                <span>25% (BASELINE)</span>
+                <span>60% (STANDARD)</span>
+                <span>100% (CONSERVATIVE / 290 kW)</span>
+              </div>
+            </div>
+
+            <div class="strat-inspect-cell">
+              <div class="strat-inspect-header">
+                <span class="strat-inspect-label">ACTIVE INSPECTION TARGET</span>
+                <button type="button" id="btn-reset-inspection" class="btn-reset-inspection" title="Return to argmax recommended strategy" style="display: none;">
+                  ↺ RESET TO OPTIMAL
+                </button>
+              </div>
+              <div id="strat-inspect-status" class="strat-inspect-badge recommended">
+                <span class="inspect-dot"></span>
+                <span id="strat-inspect-name">ENGINE OPTIMAL: SUPER-CLIP</span>
+              </div>
+              <span class="strat-inspect-hint">Click any strategy candidate card to inspect its full 17-term objective breakdown</span>
+            </div>
+          </div>
+
+          <div class="strategy-comparison-grid" id="strategy-comparison-grid">
+            <!-- Populated dynamically by EnergyDeploymentApp.js -->
+          </div>
+        </section>
+
+        <!-- E. OPTIMIZATION BREAKDOWN ('WHY THIS WON' & TRADE-OFF) (Section 9 & 14) -->
+        <section class="opt-breakdown-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">OPTIMIZATION BREAKDOWN &amp; TRADE-OFF ANALYSIS</h2>
+              <span class="meta-tag sim-tag">[EXPLAINABLE OBJECTIVE]</span>
+            </div>
+            <span class="section-hint">FORMAL VALUE CONTRIBUTIONS &amp; FUTURE OPPORTUNITY COST</span>
+          </div>
+
+          <div class="breakdown-dual-grid">
+            <!-- Left: Why this won table -->
+            <div class="breakdown-card">
+              <div class="card-mini-title">WHY THIS WON — OBJECTIVE FUNCTION CONTRIBUTIONS</div>
+              <div class="breakdown-table-wrapper" id="opt-breakdown-table">
+                <div class="breakdown-inspect-banner optimal">
+                  <span class="bib-tag">OPTIMAL RECOMMENDATION: <strong>SUPER-CLIP</strong></span>
+                  <span class="bib-score text-blue">Optimal Score: 85/100</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">+ Immediate Race Gain</span>
+                  <span class="breakdown-val pos">+18</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">+ Position Benefit</span>
+                  <span class="breakdown-val pos">+11</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">+ Future Energy Value</span>
+                  <span class="breakdown-val pos">+12</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">+ Recovery Value</span>
+                  <span class="breakdown-val pos">+14</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">+ Overtake Value</span>
+                  <span class="breakdown-val pos">+15</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">+ Tyre Performance Value</span>
+                  <span class="breakdown-val pos">+14</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">+ Pit Strategy Value</span>
+                  <span class="breakdown-val pos">+6</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">+ Undercut/Overcut Value</span>
+                  <span class="breakdown-val pos">+2</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Energy Cost</span>
+                  <span class="breakdown-val neg">-8</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Attack Risk</span>
+                  <span class="breakdown-val neg">-3</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Defence Risk</span>
+                  <span class="breakdown-val neg">-2</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Future Opportunity Cost</span>
+                  <span class="breakdown-val neg">-4</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Counterattack Risk</span>
+                  <span class="breakdown-val neg">-3</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Pit Lane Time Loss</span>
+                  <span class="breakdown-val neg">-0</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Tyre Degradation Cost</span>
+                  <span class="breakdown-val neg">-3</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Traffic Risk</span>
+                  <span class="breakdown-val neg">-1</span>
+                </div>
+                <div class="breakdown-row">
+                  <span class="breakdown-label">- Rule &amp; Constraint Penalty</span>
+                  <span class="breakdown-val neg">-0</span>
+                </div>
+                <div class="breakdown-row total-row">
+                  <span class="breakdown-label"><strong>TOTAL STRATEGY SCORE (SEC 44)</strong></span>
+                  <span class="breakdown-val text-blue"><strong>51 (Normalized: 85/100)</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Option A vs Option B Comparison -->
+            <div class="tradeoff-card">
+              <div class="card-mini-title">FUTURE OPPORTUNITY COMPARISON (SPEND NOW VS SAVE FOR LATER)</div>
+              <div class="tradeoff-content" id="tradeoff-comparison-box">
+                <!-- Live Causal Factors Bar: Battery SOC, Car Ahead, Car Behind -->
+                <div class="tradeoff-factors-bar">
+                  <div class="tf-factor-chip tf-soc-high">
+                    <div class="tf-chip-top">
+                      <span class="tf-chip-title">BATTERY FACTOR (SOC)</span>
+                      <span class="tf-chip-badge high">HEALTHY</span>
+                    </div>
+                    <div class="tf-chip-val">58% · 11.6 MJ</div>
+                    <div class="tf-chip-sub">Free: +7.50 MJ | Floor: 4.1 MJ</div>
+                  </div>
+
+                  <div class="tf-factor-chip tf-ahead-drs">
+                    <div class="tf-chip-top">
+                      <span class="tf-chip-title">CAR AHEAD CASE</span>
+                      <span class="tf-chip-badge drs">DRS ACTIVE</span>
+                    </div>
+                    <div class="tf-chip-val">0.7s</div>
+                    <div class="tf-chip-sub">DRS ATTACK CONE (&lt;=0.8s)</div>
+                  </div>
+
+                  <div class="tf-factor-chip tf-behind-safe">
+                    <div class="tf-chip-top">
+                      <span class="tf-chip-title">CAR BEHIND CASE</span>
+                      <span class="tf-chip-badge safe">SAFE</span>
+                    </div>
+                    <div class="tf-chip-val">1.4s</div>
+                    <div class="tf-chip-sub">CLEAR AIR (SAFE &gt;=1.0s)</div>
+                  </div>
+                </div>
+
+                <!-- Energy Productivity & Worthwhile Assessment Engine Strip -->
+                <div class="tradeoff-productivity-strip worthwhile">
+                  <div class="tps-header">
+                    <div class="tps-left">
+                      <span class="tps-tag">ENERGY PRODUCTIVITY &amp; WORTHWHILE ASSESSMENT</span>
+                      <span class="tps-badge worthwhile">HIGHLY PRODUCTIVE &amp; WORTHWHILE (+0.30s/MJ · 87% PASS YIELD)</span>
+                    </div>
+                    <div class="tps-roi">
+                      <span class="tps-roi-title">ENERGY ROI:</span>
+                      <span class="tps-roi-val">+0.30 s/MJ (87% Pass Yield)</span>
+                    </div>
+                  </div>
+                <!-- Real Counterfactual Optimization Card: SPEND NOW VS SAVE FOR LATER (Sections 4, 5, 6, 7 & 15) -->
+                <div class="spend-vs-save-container" id="spend-vs-save-box">
+                  <div class="svs-header">
+                    <div class="svs-title-group">
+                      <span class="svs-kicker">COUNTERFACTUAL HORIZON OPTIMIZATION (H = 5 LAPS)</span>
+                      <strong class="svs-main-title">SPEND NOW VS SAVE FOR LATER</strong>
+                    </div>
+                    <div class="svs-verdict-pill winner-spend" id="svs-verdict-pill">SPEND WINS BY +0.24</div>
+                  </div>
+
+                  <div class="svs-grid">
+                    <!-- Column 1: SPEND NOW -->
+                    <div class="svs-card svs-spend-card" id="svs-spend-card">
+                      <div class="svs-card-hdr">
+                        <div class="svs-card-title">SPEND NOW (SCENARIO A)</div>
+                        <span class="svs-badge spend" id="svs-spend-badge">CANDIDATE BURST</span>
+                      </div>
+                      <div class="svs-rows">
+                        <div class="svs-row"><span class="svs-label">Expected Gain</span><span class="svs-val pos" id="svs-sn-gain">+0.29s</span></div>
+                        <div class="svs-row"><span class="svs-label">Energy Cost</span><span class="svs-val neg" id="svs-sn-cost">-1.40 MJ</span></div>
+                        <div class="svs-row"><span class="svs-label">Future Opportunity</span><span class="svs-val neg" id="svs-sn-fut">-0.05</span></div>
+                        <div class="svs-row"><span class="svs-label">Defence Risk</span><span class="svs-val" id="svs-sn-def">+0.02</span></div>
+                        <div class="svs-row svs-total"><span class="svs-label">RACE VALUE</span><strong class="svs-val svs-score" id="svs-sn-value">0.75</strong></div>
+                      </div>
+                    </div>
+
+                    <!-- Column 2: SAVE FOR LATER -->
+                    <div class="svs-card svs-save-card" id="svs-save-card">
+                      <div class="svs-card-hdr">
+                        <div class="svs-card-title">SAVE FOR LATER (SCENARIO B)</div>
+                        <span class="svs-badge save" id="svs-save-badge">PRESERVE &amp; RECOVER</span>
+                      </div>
+                      <div class="svs-rows">
+                        <div class="svs-row"><span class="svs-label">Current Gain</span><span class="svs-val" id="svs-sl-gain">+0.05s</span></div>
+                        <div class="svs-row"><span class="svs-label">Energy Preserved</span><span class="svs-val pos" id="svs-sl-pres">+1.40 MJ</span></div>
+                        <div class="svs-row"><span class="svs-label">Future Opportunity</span><span class="svs-val pos" id="svs-sl-fut">+0.52</span></div>
+                        <div class="svs-row"><span class="svs-label">Recovery Value</span><span class="svs-val pos" id="svs-sl-rec">+0.18</span></div>
+                        <div class="svs-row svs-total"><span class="svs-label">RACE VALUE</span><strong class="svs-val svs-score" id="svs-sl-value">0.51</strong></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Best Future Opportunity & Causal Proof -->
+                  <div class="svs-target-banner" id="svs-target-banner">
+                    <div class="stb-left">
+                      <span class="stb-kicker">BEST FUTURE OPPORTUNITY (ROLLING HORIZON):</span>
+                      <strong class="stb-target" id="svs-best-target-text">Lap 25 → Sector 2 → Zone 5 (Main DRS Straight)</strong>
+                      <span class="stb-stats" id="svs-best-target-stats">Energy: 1.40 MJ | Gain: +0.30s | Pass Prob: 86% | Future Value: 0.52</span>
+                    </div>
+                    <div class="stb-reason-box">
+                      <span class="stb-reason-label">MATHEMATICAL CAUSAL PROOF:</span>
+                      <span class="stb-reason-text" id="svs-causal-reason">Attacking now in Zone 5 delivers superior immediate race gain (+0.29s, 95% pass probability) with 7.90 MJ free energy, exceeding downstream deferred value by +0.24.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tradeoff-directive-bar">
+                  <div class="directive-left">
+                    <span class="directive-label">DECISION DIRECTIVE:</span>
+                    <span class="directive-badge deploy">DEPLOY NOW (SUPER-CLIP 350 kW)</span>
+                  </div>
+                  <span class="directive-zone">Zone 5 (Hangar Straight)</span>
+                </div>
+
+                <div class="tradeoff-split">
+                  <div class="tradeoff-col active-opt">
+                    <div class="tradeoff-col-hdr">
+                      <div class="tradeoff-opt-title">OPTION A — SPEND NOW</div>
+                      <span class="opt-tag active">OPTIMAL CHOICE</span>
+                    </div>
+                    <div class="tradeoff-opt-sub">Zone 5 (High-Speed Acceleration Straight)</div>
+                    <div class="tradeoff-opt-stats">Overtake: 87% | -1.40 MJ (Gain: +0.42s)</div>
+                    <div class="tradeoff-opt-desc">Deploy discretionary electrical energy immediately in current attack window.</div>
+                  </div>
+                  <div class="tradeoff-col">
+                    <div class="tradeoff-col-hdr">
+                      <div class="tradeoff-opt-title">OPTION B — SAVE FOR LATER</div>
+                      <span class="opt-tag">ALTERNATIVE</span>
+                    </div>
+                    <div class="tradeoff-opt-sub">Next Lap — Zone 5 (Main DRS Straight)</div>
+                    <div class="tradeoff-opt-stats">Overtake: 91% | -1.40 MJ (Gain: +0.45s)</div>
+                    <div class="tradeoff-opt-desc">Preserve usable pack to guarantee maximum attack power on subsequent straight.</div>
+                  </div>
+                </div>
+
+                <!-- 4 Strategic Ways Evaluation Strip -->
+                <div class="tradeoff-4strats-section">
+                  <div class="tradeoff-4strats-title">4 STRATEGIC WAYS EVALUATION (BRAKING, SUPER-CLIP, NORMAL, COAST)</div>
+                  <div class="tradeoff-4strats-grid">
+                    <div class="tradeoff-strat-pill recommended">
+                      <div class="tsp-header">
+                        <span class="tsp-name">SUPER-CLIP</span>
+                        <span class="tsp-score">94 PTS</span>
+                      </div>
+                      <div class="tsp-power">350 kW (BURST)</div>
+                      <div class="tsp-metrics">
+                        <span class="tsp-energy neg">-1.40 MJ</span>
+                        <span class="tsp-gain">+0.42s</span>
+                      </div>
+                      <div class="tsp-status rec">RECOMMENDED</div>
+                    </div>
+                    <div class="tradeoff-strat-pill feasible">
+                      <div class="tsp-header">
+                        <span class="tsp-name">NORMAL</span>
+                        <span class="tsp-score">82 PTS</span>
+                      </div>
+                      <div class="tsp-power">200 kW (NORMAL)</div>
+                      <div class="tsp-metrics">
+                        <span class="tsp-energy neg">-0.80 MJ</span>
+                        <span class="tsp-gain">+0.25s</span>
+                      </div>
+                      <div class="tsp-status feas">FEASIBLE</div>
+                    </div>
+                    <div class="tradeoff-strat-pill feasible">
+                      <div class="tsp-header">
+                        <span class="tsp-name">COAST</span>
+                        <span class="tsp-score">60 PTS</span>
+                      </div>
+                      <div class="tsp-power">0 kW (LIFT &amp; COAST)</div>
+                      <div class="tsp-metrics">
+                        <span class="tsp-energy pos">+0.00 MJ</span>
+                        <span class="tsp-gain">-0.12s</span>
+                      </div>
+                      <div class="tsp-status feas">FEASIBLE</div>
+                    </div>
+                    <div class="tradeoff-strat-pill feasible">
+                      <div class="tsp-header">
+                        <span class="tsp-name">HARVEST</span>
+                        <span class="tsp-score">45 PTS</span>
+                      </div>
+                      <div class="tsp-power">MGU-K REGEN (350 kW)</div>
+                      <div class="tsp-metrics">
+                        <span class="tsp-energy pos">+1.15 MJ</span>
+                        <span class="tsp-gain">-0.35s</span>
+                      </div>
+                      <div class="tsp-status feas">FEASIBLE</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tradeoff-banner">
+                  <div class="tradeoff-banner-title">
+                    <span class="tb-icon">⚡</span>
+                    <strong>ENGINE RECOMMENDATION: SPEND NOW</strong>
+                  </div>
+                  <div class="tradeoff-banner-text">
+                    Attacking now in Zone 5 delivers superior immediate race value (+0.42s) while maintaining legal defensive reserve.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- F. CURRENT ZONE INFORMATION (Section 18) -->
+        <section class="zone-info-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">CURRENT ZONE TELEMETRY &amp; PERFORMANCE METRICS</h2>
+              <span class="meta-tag sim-tag">[CIRCUIT ALIGNMENT]</span>
+            </div>
+            <span class="section-hint">DYNAMIC EVALUATION METRICS UTILIZED BY OPTIMIZER</span>
+          </div>
+
+          <div class="zone-telemetry-banner" id="zone-telemetry-banner">
+            <div class="ztb-left">
+              <span class="ztb-pill">ZONE 5 (Z5)</span>
+              <strong class="ztb-name">Hangar Straight · Sector 2</strong>
+            </div>
+            <span class="ztb-type-badge accel">HIGH-SPEED ACCELERATION STRAIGHT</span>
+          </div>
+
+          <div class="zone-info-grid" id="zone-info-grid">
+            <div class="zone-metric-card">
+              <span class="zone-metric-val">95/100</span>
+              <span class="zone-metric-label">PERFORMANCE POTENTIAL</span>
+              <div class="zone-mini-meter"><div class="zone-mini-meter-fill" style="width: 95%;"></div></div>
+            </div>
+            <div class="zone-metric-card">
+              <span class="zone-metric-val text-green">92/100</span>
+              <span class="zone-metric-label">OVERTAKE POTENTIAL</span>
+              <div class="zone-mini-meter"><div class="zone-mini-meter-fill fill-green" style="width: 92%;"></div></div>
+            </div>
+            <div class="zone-metric-card">
+              <span class="zone-metric-val">15/100</span>
+              <span class="zone-metric-label">RECOVERY POTENTIAL</span>
+              <div class="zone-mini-meter"><div class="zone-mini-meter-fill fill-amber" style="width: 15%;"></div></div>
+            </div>
+            <div class="zone-metric-card">
+              <span class="zone-metric-val">40/100</span>
+              <span class="zone-metric-label">DEFENCE VALUE</span>
+              <div class="zone-mini-meter"><div class="zone-mini-meter-fill" style="width: 40%;"></div></div>
+            </div>
+            <div class="zone-metric-card">
+              <span class="zone-metric-val">90/100</span>
+              <span class="zone-metric-label">ENERGY EFFICIENCY</span>
+              <div class="zone-mini-meter"><div class="zone-mini-meter-fill fill-cyan" style="width: 90%;"></div></div>
+            </div>
+            <div class="zone-metric-card">
+              <span class="zone-metric-val text-blue">HIGH</span>
+              <span class="zone-metric-label">CLOSING SPEED (0.7s)</span>
+              <div class="zone-mini-meter"><div class="zone-mini-meter-fill fill-blue" style="width: 85%;"></div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- G. NUMERICAL ENERGY FLOW PIPELINE (Section 19 & 25) -->
+        <section class="energy-flow-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">ENERGY FLOW PIPELINE</h2>
+              <span class="meta-tag sim-tag">[SIMULATED / CALCULATED]</span>
+            </div>
+            <span class="section-hint">ZONE-BY-ZONE DISCRETIZED PHYSICAL TRANSFER (1 MW × 1s = 1 MJ)</span>
+          </div>
+
+          <div class="flow-pipeline-grid">
+            <div class="flow-node">
+              <span class="node-label">CURRENT ENERGY</span>
+              <strong class="node-value text-blue" id="flow-current">12.4 MJ</strong>
+              <span class="node-soc" id="flow-current-soc">SOC 62%</span>
+            </div>
+            <div class="flow-arrow">
+              <span class="arrow-symbol">→</span>
+              <span class="flow-delta text-red" id="flow-deploy-delta">-1.40 MJ</span>
+              <span class="arrow-label">DEPLOY (WHAT)</span>
+            </div>
+            <div class="flow-node highlight">
+              <span class="node-label">RACE GAIN</span>
+              <strong class="node-value text-green" id="flow-gain">+0.42 s</strong>
+              <span class="node-sub" id="flow-gain-sub">DRS Straight Delta</span>
+            </div>
+            <div class="flow-arrow">
+              <span class="arrow-symbol">→</span>
+              <span class="flow-delta text-green" id="flow-recovery-delta">+0.80 MJ</span>
+              <span class="arrow-label" id="flow-recovery-label">RECOVERY (Z6)</span>
+            </div>
+            <div class="flow-node">
+              <span class="node-label">FUTURE ENERGY</span>
+              <strong class="node-value text-blue" id="flow-future">11.8 MJ</strong>
+              <span class="node-soc" id="flow-future-soc">SOC 59%</span>
+            </div>
+          </div>
+
+          <div class="flow-net-summary">
+            <span>NET ZONE-TRANSITION ENERGY CHANGE: <strong class="text-mono" id="flow-net-change">-0.60 MJ</strong></span>
+            <span class="flow-note text-muted">Recovery is non-1:1 independent physics (Efficiency 88% / Quota 7.0 MJ per lap)</span>
+          </div>
+        </section>
+
+        <!-- H. CONSTRAINT → OPTIMIZATION → DECISION (Section 15) -->
+        <section class="adaptation-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">CONSTRAINT → OPTIMIZATION → DECISION</h2>
+              <span class="meta-tag fia-tag">[DYNAMIC ADAPTATION]</span>
+            </div>
+            <span class="section-hint">THE ENGINE OVERCOMES CONSTRAINTS RATHER THAN MERELY DISPLAYING THEM</span>
+          </div>
+
+          <div class="adaptation-flow-track">
+            <div class="adapt-step">
+              <div class="step-badge">1. CONSTRAINT</div>
+              <strong class="step-title text-red" id="adapt-c1">SOC Falling (&lt; 40%)</strong>
+              <span class="step-desc" id="adapt-desc-1">Regulatory floor &amp; finite usable pack</span>
+            </div>
+            <div class="adapt-connector">↓</div>
+            <div class="adapt-step">
+              <div class="step-badge">2. OPTIMIZER</div>
+              <strong class="step-title text-amber" id="adapt-c2">Future Attack Needs 1.4 MJ</strong>
+              <span class="step-desc" id="adapt-desc-2">Opportunity valuation higher on DRS straight</span>
+            </div>
+            <div class="adapt-connector">↓</div>
+            <div class="adapt-step">
+              <div class="step-badge">3. DECISION</div>
+              <strong class="step-title text-blue" id="adapt-c3">COAST IN TURN 1-2</strong>
+              <span class="step-desc" id="adapt-desc-3">Zero discretionary power draw</span>
+            </div>
+            <div class="adapt-connector">↓</div>
+            <div class="adapt-step">
+              <div class="step-badge">4. RECOVERY</div>
+              <strong class="step-title text-green" id="adapt-c4">+0.80 MJ IN Z6</strong>
+              <span class="step-desc" id="adapt-desc-4">Heavy braking harvest quota intact</span>
+            </div>
+            <div class="adapt-connector">↓</div>
+            <div class="adapt-step">
+              <div class="step-badge">5. NEXT ATTACK</div>
+              <strong class="step-title text-blue" id="adapt-c5">SUPER-CLIP ACTIVATED</strong>
+              <span class="step-desc" id="adapt-desc-5">Sufficient free energy unlocked</span>
+            </div>
+            <div class="adapt-connector">↓</div>
+            <div class="adapt-step highlight">
+              <div class="step-badge">6. OUTCOME</div>
+              <strong class="step-title text-green" id="adapt-c6">PASS COMPLETE (+0.42s)</strong>
+              <span class="step-desc" id="adapt-desc-6">Higher net race value delivered</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- I. MULTI-LAP FUTURE ENERGY TIMELINE (Section 21) -->
+        <section class="multi-lap-timeline-section">
+          <div class="timeline-header">
+            <div class="title-with-badge">
+              <h2 class="timeline-title">MULTI-LAP ENERGY FLOW TIMELINE (ZONE → SECTOR → LAP → NEXT LAP)</h2>
+              <span class="meta-tag sim-tag">[STATE PERSISTS ACROSS LAPS]</span>
+            </div>
+            <span class="timeline-sub">STATE CARRIES FORWARD CONTINUOUSLY ACROSS UP TO 5 FUTURE LAPS</span>
+          </div>
+          <div class="timeline-scroll" id="multi-lap-timeline">
+            <!-- Rendered dynamically by EnergyDeploymentApp.js -->
+          </div>
+        </section>
+
+        <!-- J. 13 GENERAL CONSTRAINTS INSPECTOR (Section 5) -->
+        <section class="constraints-inspector-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">13 GENERAL DECISION ENGINE CONSTRAINTS (C1 TO C13)</h2>
+              <span class="meta-tag fia-tag">[ENGINE AUDIT]</span>
+            </div>
+            <button class="btn-toggle-constraints" id="btn-toggle-constraints">
+              VIEW FULL CONSTRAINT MATRIX (13 CONSTRAINTS)
+            </button>
+          </div>
+
+          <!-- Live Constraint Interconnection Summary Bar -->
+          <div class="constraints-live-summary-bar" id="constraints-live-summary-bar">
+            <div class="constraints-summary-counts" id="constraints-summary-counts">
+              <span class="c-count-badge clamped" id="c-count-limiting">0 LIMITING</span>
+              <span class="c-count-badge compliant" id="c-count-compliant">13 COMPLIANT</span>
+              <span class="c-active-driver-label" id="c-active-driver-label">ACTIVE SLIDER DRIVERS: Standard Envelope</span>
+            </div>
+            <div class="constraints-quick-chips" id="constraints-quick-chips">
+              <!-- Filled dynamically with C1..C13 interactive chips -->
+            </div>
+          </div>
+
+          <div class="constraints-matrix-grid" id="constraints-matrix-grid" style="display: none;">
+            <!-- Filled dynamically by EnergyDeploymentApp.js -->
+          </div>
+        </section>
+
+        <!-- K. DECISION TRACE & INTERNAL AUDIT MODE (Sections 30, 43, 44) -->
+        <section class="decision-trace-audit-section" id="decision-trace-audit-section">
+          <div class="section-title-row">
+            <div class="title-with-badge">
+              <h2 class="section-title">DECISION TRACE & INTERNAL AUDIT MODE (SECTIONS 43 & 44)</h2>
+              <span class="meta-tag sim-tag">[DETERMINISTIC TWIN]</span>
+            </div>
+            <button class="btn-toggle-trace" id="btn-toggle-trace">
+              VIEW AUDIT STATE MATRIX (SECTION 43)
+            </button>
+          </div>
+
+          <!-- 12-Point Canonical Decision Trace Box -->
+          <div class="decision-trace-box" id="decision-trace-box">
+            <div class="trace-header">
+              <div class="trace-header-left">
+                <span class="trace-badge">CANONICAL 12-POINT DECISION TRACE</span>
+                <span class="trace-hint">Deterministic constraint-derived logic chain</span>
+              </div>
+              <span class="trace-winner-badge" id="trace-winner-badge">OPTIMAL: SUPER-CLIP</span>
+            </div>
+            <div class="trace-lines-grid" id="trace-lines-grid">
+              <!-- Filled dynamically by EnergyDeploymentApp.js -->
+            </div>
+          </div>
+
+          <!-- Internal Audit Telemetry Matrix (Section 43) -->
+          <div class="internal-audit-panel" id="internal-audit-panel" style="display: none;">
+            <div class="audit-header">
+              <span class="audit-title">CENTRAL STATE AUDIT MATRIX</span>
+              <span class="audit-sub">Input, Energy, Tyre, Pit, Attack, Defence, and Constraints</span>
+            </div>
+            <div class="audit-category-grid" id="audit-category-grid">
+              <!-- Filled dynamically by EnergyDeploymentApp.js -->
+            </div>
+          </div>
+        </section>
+
+      </main>
+
     </div>
 
-    <div class="header-actions">
-      <!-- Circuit Selector -->
-      <select id="select-circuit" class="select-control" title="Select Circuit">
-        <option value="MONZA">MONZA (AUTODROMO NAZIONALE)</option>
-        <option value="SILVERSTONE">SILVERSTONE (GP CIRCUIT)</option>
-        <option value="SPA">SPA-FRANCORCHAMPS</option>
-      </select>
-
-      <!-- Scenario Selector (10 Scenarios) -->
-      <select id="select-scenario" class="select-control" style="border-color: var(--f1-yellow);" title="Select Scenario">
-        <option value="0">1. High Overtake / Low Counter-Risk (Case A)</option>
-        <option value="1">2. High Overtake / High Counter-Risk (Case D)</option>
-        <option value="2">3. Low Energy / Strong Future Opportunity (Case B)</option>
-        <option value="3">4. High Energy / Poor Current Opportunity</option>
-        <option value="4">5. Strong Future Harvest Ahead</option>
-        <option value="5">6. Weak Future Harvest Horizon</option>
-        <option value="6">7. Multiple Competing Overtake Windows</option>
-        <option value="7">8. Late-Race Energy Scarcity</option>
-        <option value="8">9. Defensive Situation (Defending P1)</option>
-        <option value="9">10. Constraint-Limited Deployment (FIA Cap)</option>
-      </select>
-
-      <!-- Simulation Playback Controls -->
-      <button id="btn-play-pause" class="btn btn-warning">STREAM LIVE</button>
-      <button id="btn-step" class="btn">STEP +</button>
-      <button id="btn-speed" class="btn">1.0X</button>
-      <button id="btn-reset" class="btn">RESET</button>
-
-      <!-- Modal & Drawer triggers -->
-      <button id="btn-benchmark" class="btn btn-primary">BENCHMARK BASELINES</button>
-      <button id="btn-settings" class="btn btn-cyan">REGULATIONS & WEIGHTS</button>
-    </div>
-  </header>
-
-  <!-- EXACT DECISION TIMESTAMP BANNER (Prompt Section 12) -->
-  <section class="decision-banner">
-    <!-- Block 1: Exact Moment -->
-    <div class="banner-block">
-      <div class="banner-label">DECISION TIMESTAMP</div>
-      <div class="banner-title-val" id="banner-lap">LAP 23</div>
-      <div class="banner-subdata">
-        <span>TIME: <strong id="banner-time">01:18.432</strong></span>
-        <span>DIST: <strong id="banner-dist">4,382 m</strong></span>
-      </div>
-      <div style="font-size: 0.65rem; color: var(--f1-cyan); font-weight: 700; margin-top: 3px;" id="banner-zone">
-        ATTACK STRAIGHT
-      </div>
-    </div>
-
-    <!-- Block 2: Current Vehicle State -->
-    <div class="banner-block highlight-cyan">
-      <div class="banner-label">ESTIMATED ERS STATE</div>
-      <div class="banner-title-val" style="color: var(--f1-cyan);" id="banner-ers">2.91 MJ</div>
-      <div class="banner-subdata">
-        <span>MGU-K: <strong id="banner-mguk">184 kW</strong></span>
-        <span>GAP: <strong id="banner-gap">0.82 s</strong></span>
-      </div>
-      <div class="banner-subdata">
-        <span>CLOSING: <strong id="banner-closing">+7.4 km/h</strong></span>
-      </div>
-    </div>
-
-    <!-- Block 3: Decision Engine Model Probabilities -->
-    <div class="banner-block highlight-yellow">
-      <div class="banner-label">DECISION ENGINE // MULTI-HORIZON</div>
-      <div class="banner-subdata" style="margin-top: 2px;">
-        <span>P(OVERTAKE): <strong style="color: var(--f1-green); font-size: 0.95rem;" id="banner-povertake">82%</strong></span>
-        <span>P(COUNTER): <strong style="color: var(--f1-red); font-size: 0.95rem;" id="banner-pcounter">17%</strong></span>
-      </div>
-      <div class="banner-subdata" style="margin-top: 4px;">
-        <span>REQ: <strong id="banner-ereq">0.72 MJ</strong></span>
-        <span>HARVEST: <strong style="color: var(--f1-green);" id="banner-eharvest">+0.21 MJ</strong></span>
-        <span>FUT VALUE: <strong style="color: var(--f1-yellow);" id="banner-futopp">0.76</strong></span>
-      </div>
-    </div>
-
-    <!-- Block 4: Optimal Control Output -->
-    <div class="banner-block highlight-red">
-      <div class="banner-label">OPTIMAL FEASIBLE CONTROL</div>
-      <div class="banner-title-val" style="color: #fff; font-size: 1.15rem;">
-        DEPLOY <span id="banner-deploy-power" style="color: var(--f1-red);">312 kW</span> FOR <span id="banner-deploy-dur">2.3 s</span>
-      </div>
-      <div class="banner-subdata">
-        <span>START: <strong>+0.4 s</strong></span>
-        <span>EST ENERGY COST: <strong id="banner-deploy-cost">0.72 MJ</strong></span>
-      </div>
-    </div>
-
-    <!-- Block 5: Final Human-Readable Recommendation -->
-    <div class="recommendation-pill" id="banner-pill">
-      <div class="pill-rec-code" id="banner-rec-code">DEPLOY NOW</div>
-      <div class="pill-rec-sub" id="banner-rec-sub">OPTIMAL STRIKE WINDOW ENGAGED</div>
-    </div>
-  </section>
-
-  <!-- Main Cockpit 3-Column Grid -->
-  <main class="dashboard-grid">
-
-    <!-- LEFT COLUMN: Cockpit Telemetry & Vehicle ERS State -->
-    <section class="f1-panel">
-      <div class="ca-tl corner-accent"></div><div class="ca-tr corner-accent"></div>
-      <div class="ca-bl corner-accent"></div><div class="ca-br corner-accent"></div>
-
-      <div class="panel-header">
-        <span>VEHICLE TELEMETRY</span>
-        <strong id="disp-position" style="color: var(--f1-yellow); font-family: var(--font-mono);">P2</strong>
-      </div>
-
-      <div class="panel-body">
-        <!-- Live Velocity & Powertrain Grid -->
-        <div class="telemetry-grid">
-          <div class="telemetry-cell active-cyan">
-            <label>SPEED</label>
-            <div class="val"><span id="disp-speed">314.5</span> <span class="unit">KM/H</span></div>
-          </div>
-          <div class="telemetry-cell active-yellow">
-            <label>CURRENT GEAR</label>
-            <div class="val" id="disp-gear">7</div>
-          </div>
-        </div>
-
-        <!-- Pedals Telemetry -->
-        <div class="gauge-box">
-          <div class="gauge-header">
-            <span>THROTTLE</span>
-            <span>100%</span>
-          </div>
-          <div class="gauge-bar-outer">
-            <div class="gauge-bar-inner bar-green" id="disp-throttle-bar" style="width: 100%;"></div>
-          </div>
-        </div>
-
-        <div class="gauge-box">
-          <div class="gauge-header">
-            <span>BRAKE (KINETIC RECOVERY)</span>
-            <span>0%</span>
-          </div>
-          <div class="gauge-bar-outer">
-            <div class="gauge-bar-inner bar-red" id="disp-brake-bar" style="width: 0%;"></div>
-          </div>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 12px 0;">
-
-        <!-- ESTIMATED ERS STATE (Explicitly labeled as required in Section 4) -->
-        <div style="font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--f1-cyan); font-weight: 700; margin-bottom: 8px;">
-          ESTIMATED ERS STATE // TELEMETRY DERIVED
-        </div>
-
-        <div class="gauge-box">
-          <div class="gauge-header">
-            <span>BATTERY STATE OF CHARGE (SOC)</span>
-            <span id="disp-soc-val" style="font-family: var(--font-mono); color: #fff;">72.8%</span>
-          </div>
-          <div class="gauge-bar-outer">
-            <div class="gauge-bar-inner bar-cyan" id="disp-soc-bar" style="width: 72.8%;"></div>
-          </div>
-        </div>
-
-        <div class="gauge-box">
-          <div class="gauge-header">
-            <span>CELL CORE TEMPERATURE</span>
-            <span id="disp-temp-val" style="font-family: var(--font-mono); color: var(--f1-yellow);">58.4°C</span>
-          </div>
-          <div class="gauge-bar-outer">
-            <div class="gauge-bar-inner bar-yellow" id="disp-temp-bar" style="width: 58.4%;"></div>
-          </div>
-        </div>
-
-        <div class="gauge-box">
-          <div class="gauge-header">
-            <span>LAP ELECTRICAL DEPLOYMENT (4.0 MJ CAP)</span>
-            <span id="disp-lap-deployed" style="font-family: var(--font-mono); color: var(--f1-red);">1.94 MJ</span>
-          </div>
-          <div class="gauge-bar-outer">
-            <div class="gauge-bar-inner bar-red" id="disp-quota-bar" style="width: 48.5%;"></div>
-          </div>
-        </div>
-
-        <div class="telemetry-grid" style="margin-top: 14px;">
-          <div class="telemetry-cell active-green">
-            <label>HARVESTED THIS LAP</label>
-            <div class="val" id="disp-lap-harvested" style="color: var(--f1-green);">+0.85 MJ</div>
-          </div>
-          <div class="telemetry-cell active-cyan">
-            <label>REGEN EFFICIENCY</label>
-            <div class="val">82% <span class="unit">η_regen</span></div>
-          </div>
-        </div>
-
-        <div style="font-size: 0.65rem; color: var(--text-muted); line-height: 1.4; margin-top: 10px; background: rgba(0,0,0,0.3); padding: 6px 8px; border-radius: 3px;">
-          <strong>NOTE:</strong> Energy values represent observable telemetry approximations ($\Delta E_k = 0.5m(v_1^2 - v_2^2)$ and $\int P dt$), strictly non-confidential.
-        </div>
-      </div>
-    </section>
-
-    <!-- CENTER COLUMN: Interactive 2D Circuit Map + Multi-Horizon Windows + Split Charts -->
-    <section class="center-column">
-
-      <!-- Interactive 2D Circuit Viewport -->
-      <div class="track-viewport-wrapper">
-        <div class="ca-tl corner-accent"></div><div class="ca-tr corner-accent"></div>
-        <div class="ca-bl corner-accent"></div><div class="ca-br corner-accent"></div>
-
-        <div class="track-hud-overlay">
-          <div class="hud-pill">
-            <span>CIRCUIT TWIN:</span>
-            <strong id="hud-circuit-name">MONZA AUTODROMO // GP CONFIG</strong>
-          </div>
-          <div class="hud-pill">
-            <span>SECTOR CLASSIFICATION:</span>
-            <span style="color: var(--f1-cyan);">DYNAMIC TELEMETRY STREAM</span>
-          </div>
-        </div>
-
-        <canvas id="track-canvas"></canvas>
-      </div>
-
-      <!-- Multi-Horizon Upcoming Tactical Windows (Sections 6 & 7) -->
-      <div>
-        <div style="font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between;">
-          <span>MULTI-HORIZON TACTICAL LOOKAHEAD (CURRENT → +4 ZONES)</span>
-          <span style="color: var(--f1-yellow);">ROLLING-HORIZON EVALUATION</span>
-        </div>
-        <div class="future-windows-strip" id="future-windows-strip">
-          <!-- Populated dynamically by App.js -->
-        </div>
-      </div>
-
-      <!-- Split Power & Trajectory Charts (Sections 14 & 15) -->
-      <div class="charts-split">
-        <!-- Power Utilization Graph -->
-        <div class="chart-card">
-          <div class="panel-header">
-            <span>MGU-K POWER TRAJECTORY (kW)</span>
-            <span style="color: var(--f1-yellow); font-family: var(--font-mono);">0 → 350 kW LIMIT</span>
-          </div>
-          <div class="chart-canvas-wrapper">
-            <canvas id="power-canvas"></canvas>
-          </div>
-        </div>
-
-        <!-- Multi-Horizon Energy Trajectory Graph -->
-        <div class="chart-card">
-          <div class="panel-header">
-            <span>FUTURE ENERGY TRAJECTORY (MJ)</span>
-            <span style="color: var(--f1-cyan); font-family: var(--font-mono);">MULTI-POLICY EVALUATION</span>
-          </div>
-          <div class="chart-canvas-wrapper">
-            <canvas id="trajectory-canvas"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RIGHT COLUMN: Decision Explainer & Historical Lap Log -->
-    <section class="f1-panel">
-      <div class="ca-tl corner-accent"></div><div class="ca-tr corner-accent"></div>
-      <div class="ca-bl corner-accent"></div><div class="ca-br corner-accent"></div>
-
-      <div class="panel-header">
-        <span>AI DECISION EXPLAINABILITY</span>
-        <span style="color: var(--f1-green); font-family: var(--font-mono);">FEASIBLE // RANK 1</span>
-      </div>
-
-      <div class="panel-body">
-        <!-- Explainer Checklist Container (Section 16) -->
-        <div id="explainer-container">
-          <!-- Populated by DecisionExplainer.js -->
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 14px 0;">
-
-        <!-- Historical Decision Log & Time Travel (Sections 13 & 23) -->
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">
-            LAP-BY-LAP DECISION HISTORY
-          </div>
-          <span style="font-size: 0.62rem; color: var(--f1-cyan); font-family: var(--font-mono);">CLICK ROW TO TIME-TRAVEL</span>
-        </div>
-
-        <div class="history-table-container">
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th>LAP</th>
-                <th>TIME</th>
-                <th>ZONE</th>
-                <th>P(OV)</th>
-                <th>P(CT)</th>
-                <th>ERS</th>
-                <th>POWER</th>
-                <th>CONTROL</th>
-                <th>RESULT</th>
-              </tr>
-            </thead>
-            <tbody id="history-table-body">
-              <!-- Dynamically populated rows -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- BASELINE BENCHMARK COMPARISON MODAL (Section 21) -->
-  <div class="modal-overlay" id="modal-benchmark">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div style="font-weight: 800; font-size: 1.1rem; letter-spacing: 2px;">
-          STRATEGY BENCHMARK // TRACKSHIFT VS STATIC BASELINES
-        </div>
-        <button id="modal-benchmark-close" class="btn" style="padding: 4px 10px;">✕ CLOSE</button>
-      </div>
-      <div class="modal-body">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div style="font-size: 0.8rem; color: var(--text-muted);">
-            Compare TrackShift's dynamic rolling-horizon optimizer against simplistic industry threshold strategies.
-          </div>
-          <button id="btn-run-stint" class="btn btn-warning">RUN 5-LAP STINT SIMULATION</button>
-        </div>
-        <div id="benchmark-results">
-          <!-- Populated by runBenchmark() in App.js -->
-        </div>
-      </div>
-    </div>
   </div>
 
-  <!-- SETTINGS & 2026 TECHNICAL REGULATIONS DRAWER -->
-  <div class="drawer" id="drawer-settings">
-    <div class="modal-header">
-      <div style="font-weight: 800; font-size: 0.95rem; letter-spacing: 1.5px;">
-        OBJECTIVE WEIGHTS & 2026 REGS
-      </div>
-      <button id="drawer-close" class="btn" style="padding: 4px 10px;">✕</button>
-    </div>
-    <div style="padding: 16px; overflow-y: auto; flex: 1;">
-      <div style="font-size: 0.72rem; color: var(--f1-yellow); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;">
-        OBJECTIVE FUNCTION COEFFICIENTS J(a):
-      </div>
+  <!-- Entrypoint -->
 
-      <!-- V_gain -->
-      <div class="slider-group">
-        <div class="slider-header">
-          <span>V_gain (Overtake Success Weight)</span>
-          <strong id="val-vgain">1.4</strong>
-        </div>
-        <input type="range" id="slider-vgain" min="0.5" max="3.0" step="0.1" value="1.4">
-      </div>
-
-      <!-- V_loss -->
-      <div class="slider-group">
-        <div class="slider-header">
-          <span>V_loss (Counter-Attack Risk Penalty)</span>
-          <strong id="val-vloss">1.2</strong>
-        </div>
-        <input type="range" id="slider-vloss" min="0.5" max="3.0" step="0.1" value="1.2">
-      </div>
-
-      <!-- lambda_E -->
-      <div class="slider-group">
-        <div class="slider-header">
-          <span>λ_E (Energy Depletion Penalty)</span>
-          <strong id="val-lambdae">0.85</strong>
-        </div>
-        <input type="range" id="slider-lambdae" min="0.2" max="2.5" step="0.05" value="0.85">
-      </div>
-
-      <!-- lambda_F -->
-      <div class="slider-group">
-        <div class="slider-header">
-          <span>λ_F (Future Opportunity Loss Penalty)</span>
-          <strong id="val-lambdaf">1.1</strong>
-        </div>
-        <input type="range" id="slider-lambdaf" min="0.2" max="2.5" step="0.05" value="1.1">
-      </div>
-
-      <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 16px 0;">
-
-      <div style="font-size: 0.72rem; color: var(--f1-red); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;">
-        2026 / FIA TECHNICAL CONSTRAINTS:
-      </div>
-
-      <!-- Max Power -->
-      <div class="slider-group">
-        <div class="slider-header">
-          <span>MAX PERMITTED MGU-K POWER</span>
-          <strong id="val-maxpower">350 kW</strong>
-        </div>
-        <input type="range" id="slider-maxpower" min="120" max="400" step="10" value="350">
-      </div>
-
-      <!-- Max Lap Energy -->
-      <div class="slider-group">
-        <div class="slider-header">
-          <span>MAX DEPLOYMENT PER LAP</span>
-          <strong id="val-maxlapenergy">4.0 MJ</strong>
-        </div>
-        <input type="range" id="slider-maxlapenergy" min="2.0" max="6.0" step="0.2" value="4.0">
-      </div>
-
-      <div style="font-size: 0.65rem; color: var(--text-muted); line-height: 1.4; margin-top: 16px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 3px;">
-        Modifying any weight or technical limit triggers an immediate re-optimization cycle across the rolling horizon.
-      </div>
-    </div>
-  </div>
-
-  <!-- Main ES Module Script -->
 </body>
+
 </html>

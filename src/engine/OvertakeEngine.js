@@ -40,7 +40,7 @@ export class OvertakeEngine {
     const closingSpeedScore = 1.0 / (1.0 + Math.exp(-this.speedDeltaWeight * (totalClosingSpeed - 4.0)));
 
     // 3. Track Geometry & Zone Suitability
-    const zoneAttackBase = zone.attackOpportunity ?? 0.5;
+    const zoneAttackBase = zone.overtakingValue ?? zone.attackOpportunity ?? 0.5;
     const drsBonus = zone.drs ? 0.15 : 0.0;
 
     // 4. Corner Exit & Traction Efficiency

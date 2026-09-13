@@ -7,7 +7,7 @@
     "dev": "vite --host --port 5173",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/test_optimizer.js"
+    "test": "node tests/test_alpine_decision_twin.js && node tests/test_connected_decision_engine.js && node tests/test_dependency_audit.js && node tests/test_extreme_cases.js && node tests/test_tyre_pit_dom.js && node tests/test_slider_constraints_interconnection.js && node tests/test_constraints_dom_audit.js && node tests/test_battery_synchronization.js && node tests/test_case_validation.js && node tests/test_property_consistency.js && node tests/test_decision_trace_dom_audit.js && node tests/test_laps_remaining_slider.js && node tests/test_energy_deployment_twin.js && node tests/test_future_opportunity_tradeoff.js && node tests/test_spend_now_vs_save_later_optimization.js"
   },
   "devDependencies": {
     "vite": "^5.4.2"

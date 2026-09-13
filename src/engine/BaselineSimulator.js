@@ -58,9 +58,12 @@ export class BaselineSimulator {
 
         for (let zIdx = 0; zIdx < totalZones; zIdx++) {
           const zone = this.trackModel.circuit.zones[zIdx];
-          state.track_distance = zone.startDist;
+          state.track_distance = zone.startDistance ?? zone.startDist ?? 0;
           state.current_zone = zone.name;
           state.speed = (zone.entrySpeed + zone.exitSpeed) / 2;
+
+          const isBraking = zone.type === "BRAKING_HARVEST" || zone.type === "BRAKING";
+          const isAttack = zone.type.includes("ATTACK") || zone.type === "ATTACK_ZONE" || (zone.overtakingValue >= 0.70);
 
           let chosenPowerKw = 0;
           let chosenDurationSec = 0;
@@ -77,19 +80,19 @@ export class BaselineSimulator {
             chosenDurationSec = optResult.bestControl.duration;
           } else if (strat.id === "BASELINE_1") {
             // Naive Threshold rule: if P_overtake > 75%, fire maximum power
-            if (pOver > strat.threshold && zone.type !== "BRAKING") {
+            if (pOver > strat.threshold && !isBraking) {
               chosenPowerKw = 350;
               chosenDurationSec = 2.5;
             }
           } else if (strat.id === "BASELINE_2") {
             // Fixed Energy rule: always fire 0.8 MJ in attack zone regardless of gap or risk
-            if (zone.type === "ATTACK_ZONE") {
+            if (isAttack) {
               chosenPowerKw = 320;
               chosenDurationSec = 2.5; // 0.8 MJ
             }
           } else if (strat.id === "BASELINE_3") {
             // Ultra-Conservative: do not spend unless final laps
-            if (state.lap >= strat.conserveUntilLap && zone.type === "ATTACK_ZONE") {
+            if (state.lap >= strat.conserveUntilLap && isAttack) {
               chosenPowerKw = 280;
               chosenDurationSec = 2.0;
             }
@@ -111,15 +114,14 @@ export class BaselineSimulator {
           }
 
           // Step state
-          const isBraking = zone.type === "BRAKING";
-          const deltaBrake = isBraking ? Math.abs(zone.speedDeltaPotential) : 0;
+          const deltaBrake = isBraking ? Math.abs(zone.speedDeltaPotential || 150) : 0;
           state = this.energyEstimator.stepEnergyState(state, chosenPowerKw, isBraking, deltaBrake, 2.0);
 
           results[strat.id].totalEnergyDeployedMJ += proposedEnergy;
           results[strat.id].totalEnergyHarvestedMJ += isBraking ? 0.35 : 0.05;
 
           // Evaluate attack outcome
-          if (chosenPowerKw > 150 && zone.type === "ATTACK_ZONE") {
+          if (chosenPowerKw > 150 && isAttack) {
             // Successful overtake happens if P_overtake was high and P_counter was low
             if (pOver >= 0.70 && pCounter < 0.30 && state.opponent_gap < 0.9) {
               results[strat.id].successfulOvertakes++;

@@ -22,7 +22,1132 @@
     --f1-yellow: #ffb800;
     --f1-purple: #bb00ff;
     --f1-green: #00e676;
-    --text-main: #f0f2f5;
+    --text-main: #f0f2f5;# TRACKSHIFT — F1 ENERGY DECISION ENGINE
+
+Build TrackShift as a **simple, clean, understandable F1 race decision engine**.
+
+The system should look like a **professional motorsport decision console**, not a complicated analytics dashboard.
+
+The backend can contain sophisticated optimization logic, but the jury-facing UI must remain extremely simple.
+
+---
+
+# 1. CORE IDEA
+
+TrackShift continuously answers one question:
+
+> **"Given the current race situation, what is the best use of the car's finite ERS energy right now?"**
+
+The system considers:
+
+* Current ERS energy
+* Current track position
+* Gap to opponent
+* Closing speed
+* Overtake opportunity
+* Counter risk
+* Upcoming opportunity
+* Expected energy recovery
+* Applicable 2026 constraints
+
+Then it produces:
+
+> **ONE CLEAR DECISION**
+
+For example:
+
+```text
+DEPLOY 286 kW
+FOR 1.8 SEC
+```
+
+or:
+
+```text
+WAIT 2.4 SEC
+```
+
+or:
+
+```text
+HOLD ENERGY
+```
+
+Do NOT show ATTACK / SAVE / DEFEND as the actual optimization action.
+
+Those can be used only as simple interpretations of the selected control.
+
+---
+
+# 2. DESIGN PRINCIPLE
+
+The UI must follow:
+
+```text
+SEE
+ ↓
+UNDERSTAND
+ ↓
+DECIDE
+ ↓
+EXPLAIN
+```
+
+Not:
+
+```text
+SEE 30 GRAPHS
+ ↓
+READ 20 PARAMETERS
+ ↓
+UNDERSTAND COMPLEX MODEL
+```
+
+The jury should understand the decision within **5–10 seconds**.
+
+---
+
+# 3. MAIN SCREEN — ONLY THE ESSENTIAL INFORMATION
+
+The main screen should contain exactly these major areas:
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│ TRACKSHIFT                              LAP 6 / 10      │
+│ ENERGY DECISION ENGINE                                   │
+├───────────────────────────────┬─────────────────────────┤
+│                               │                         │
+│         TRACK MAP             │      CURRENT STATE      │
+│                               │                         │
+│      ● PLAYER                 │ ERS       2.84 MJ       │
+│             ● OPPONENT        │ GAP       0.82 s        │
+│                               │ SPEED     287 km/h      │
+│                               │ ZONE      ATTACK        │
+│                               │                         │
+├───────────────────────────────┴─────────────────────────┤
+│                                                         │
+│                 CURRENT OPPORTUNITY                     │
+│                                                         │
+│     OVERTAKE 82%          COUNTER RISK 17%              │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│                 TRACKSHIFT DECISION                     │
+│                                                         │
+│                    DEPLOY NOW                            │
+│                                                         │
+│               286 kW  •  1.8 sec                        │
+│                                                         │
+│          Expected Energy Cost: 0.52 MJ                  │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│                 WHY THIS DECISION?                      │
+│                                                         │
+│  ✓ Strong overtaking opportunity                         │
+│  ✓ Counter risk is acceptable                            │
+│  ✓ Energy requirement is feasible                        │
+│  ✓ Better than saving for the next window                │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│  [ RUN TEST ]    [ PAUSE ]    [ EXPLAIN DECISION ]      │
+└─────────────────────────────────────────────────────────┘
+```
+
+This is the **primary jury screen**.
+
+Do not clutter it.
+
+---
+
+# 4. TOP HEADER
+
+Keep the header minimal.
+
+Display:
+
+```text
+TRACKSHIFT
+F1 ENERGY DECISION ENGINE
+
+LAP 6 / 10
+TIME 01:18.432
+```
+
+Optional small indicator:
+
+```text
+● LIVE SIMULATION
+```
+
+Do not put large menus or unnecessary navigation here.
+
+---
+
+# 5. TRACK MAP
+
+The track map is the main visual element.
+
+Use a simple 2D circuit.
+
+The jury must immediately understand:
+
+```text
+WHERE IS THE CAR?
+WHERE IS THE OPPONENT?
+WHAT ZONE ARE THEY IN?
+WHERE IS THE NEXT OPPORTUNITY?
+```
+
+Display:
+
+```text
+PLAYER ●
+OPPONENT ●
+CURRENT ZONE
+NEXT OPPORTUNITY
+```
+
+Do not display dozens of telemetry markers.
+
+Highlight only the important strategic areas.
+
+Example:
+
+```text
+             ┌────── ATTACK ZONE ──────┐
+             │                         │
+         ● PLAYER                      │
+             │                         │
+             │                     ● OPPONENT
+             │
+        HARVEST ZONE
+```
+
+The player and opponent should move during the simulation.
+
+---
+
+# 6. CURRENT STATE CARD
+
+Show only four critical values:
+
+```text
+CURRENT STATE
+
+ERS
+2.84 MJ
+
+GAP
+0.82 s
+
+SPEED
+287 km/h
+
+ZONE
+ATTACK
+```
+
+Do not show every telemetry parameter on the main screen.
+
+Detailed telemetry can exist in the Explain view.
+
+---
+
+# 7. CURRENT OPPORTUNITY
+
+This should be visually prominent.
+
+Display only:
+
+```text
+CURRENT OPPORTUNITY
+
+OVERTAKE
+82%
+
+COUNTER RISK
+17%
+```
+
+Use simple bars or circular indicators.
+
+The jury should understand immediately:
+
+> "There is a strong chance to overtake, and the counter risk is relatively low."
+
+---
+
+# 8. THE DECISION — MOST IMPORTANT UI ELEMENT
+
+The largest element on the screen should be the TrackShift decision.
+
+Example:
+
+```text
+TRACKSHIFT DECISION
+
+        DEPLOY NOW
+
+        286 kW
+        1.8 SEC
+
+Expected Energy Cost
+0.52 MJ
+```
+
+Another possible decision:
+
+```text
+TRACKSHIFT DECISION
+
+        WAIT
+
+        2.4 SEC
+
+Next opportunity has
+higher expected value.
+```
+
+Another:
+
+```text
+TRACKSHIFT DECISION
+
+        HOLD ENERGY
+
+Current opportunity is
+not worth the energy cost.
+```
+
+The wording must remain human-readable.
+
+---
+
+# 9. DECISION SHOULD CHANGE DYNAMICALLY
+
+The decision must NOT be predetermined.
+
+As the race progresses:
+
+```text
+Gap changes
+      ↓
+Closing speed changes
+      ↓
+Overtake probability changes
+      ↓
+Energy changes
+      ↓
+Future opportunity changes
+      ↓
+Decision changes
+```
+
+Example:
+
+```text
+LAP 4
+WAIT
+
+LAP 5
+LOW DEPLOYMENT
+
+LAP 6
+DEPLOY NOW
+
+LAP 7
+HOLD ENERGY
+```
+
+The jury should be able to see that TrackShift is **continuously making decisions**, not following a fixed strategy.
+
+---
+
+# 10. "WHY THIS DECISION?"
+
+Keep this extremely simple.
+
+Show a maximum of **3–4 reasons**.
+
+Example:
+
+```text
+WHY THIS DECISION?
+
+✓ Strong overtaking probability
+✓ Low counter risk
+✓ Energy cost is affordable
+✓ Next recovery zone can replenish energy
+```
+
+For a WAIT decision:
+
+```text
+WHY WAIT?
+
+✓ Current opportunity is weak
+✓ Better opportunity is approaching
+✓ Saving energy preserves future options
+```
+
+For a HOLD decision:
+
+```text
+WHY HOLD?
+
+✓ Overtake probability is low
+✓ Energy cost is too high
+✓ Future opportunity has greater value
+```
+
+Do NOT show equations on the main screen.
+
+---
+
+# 11. EXPLAIN DECISION VIEW
+
+Create a separate button:
+
+```text
+EXPLAIN DECISION
+```
+
+Only when clicked should the technical details appear.
+
+This page can show:
+
+```text
+DECISION ANALYSIS
+
+Current State
+────────────────────────
+ERS             2.84 MJ
+Gap             0.82 s
+Closing Speed   +7.4 km/h
+Zone            Attack
+```
+
+Then:
+
+```text
+CANDIDATE CONTROLS
+
+Control             Score
+
+0 kW                0.55
+180 kW × 2.0s       0.73
+286 kW × 1.8s       0.84   ✓ SELECTED
+350 kW × 2.0s       0.71   ✕
+```
+
+Then:
+
+```text
+CONSTRAINT CHECK
+
+Energy            ✓
+Power             ✓
+Harvest           ✓
+Future Reserve    ✓
+2026 Profile      ✓
+```
+
+Then:
+
+```text
+FUTURE EFFECT
+
+Selected control:
+
+Energy after:
+2.32 MJ
+
+Expected next harvest:
++0.22 MJ
+
+Next opportunity:
+T7
+
+Future feasibility:
+HIGH
+```
+
+This keeps the main interface clean while still proving to the jury that the decision is actually optimized.
+
+---
+
+# 12. DO NOT SHOW COMPLEX MATHEMATICS UNLESS REQUESTED
+
+The optimization engine may internally use:
+
+```text
+P(overtake)
+P(counter)
+energy cost
+future opportunity value
+future harvest
+risk
+time cost
+position value
+```
+
+But do not put the mathematical objective function on the main UI.
+
+Instead translate it into:
+
+```text
+Opportunity
+Risk
+Energy
+Future Value
+```
+
+The jury understands these immediately.
+
+---
+
+# 13. SIMPLE ENERGY DISPLAY
+
+Use one clean energy visualization.
+
+Example:
+
+```text
+ESTIMATED ERS
+
+████████████░░░░
+2.84 MJ
+```
+
+Under it:
+
+```text
+This lap
+
+Harvested     +0.31 MJ
+Deployed      -0.52 MJ
+Net           -0.21 MJ
+```
+
+Do not create five different battery graphs.
+
+---
+
+# 14. FUTURE OPPORTUNITY
+
+Show only the next important opportunity.
+
+Example:
+
+```text
+NEXT OPPORTUNITY
+
+T7
+In 18.4 sec
+
+Overtake      91%
+Counter       11%
+Energy needed 0.61 MJ
+```
+
+This makes the optimizer's future planning easy to understand.
+
+The jury should see:
+
+> "TrackShift isn't only looking at this overtake. It is deciding whether today's energy is more valuable now or at the next opportunity."
+
+---
+
+# 15. DECISION TIMELINE
+
+Add a simple horizontal timeline below the main dashboard.
+
+Example:
+
+```text
+LAP 4             LAP 5             LAP 6             LAP 7
+
+ ●                 ●                 ●                 ●
+ WAIT              PREPARE           DEPLOY            HOLD
+```
+
+Clicking a decision opens its details.
+
+Do not show a giant data table on the primary screen.
+
+---
+
+# 16. RACE REPLAY
+
+After the test finishes, allow:
+
+```text
+REPLAY RACE
+```
+
+The replay should show the car moving around the same track.
+
+At each decision point:
+
+```text
+LAP 6
+
+TRACKSHIFT:
+DEPLOY 286 kW × 1.8 sec
+
+RESULT:
+Overtake successful
+
+ENERGY USED:
+0.52 MJ
+
+POSITION:
+P6 → P5
+```
+
+This makes the system understandable to the jury.
+
+---
+
+# 17. TEST RUN
+
+Create one prominent button:
+
+# RUN TEST
+
+When clicked:
+
+```text
+RESET
+ ↓
+LOAD TRACK
+ ↓
+LOAD SCENARIO
+ ↓
+START RACE
+ ↓
+GENERATE TELEMETRY
+ ↓
+RUN TRACKSHIFT
+ ↓
+RECORD DECISIONS
+ ↓
+FINISH RACE
+ ↓
+COMPARE BASELINES
+```
+
+The jury should not have to configure 20 things before seeing the system work.
+
+---
+
+# 18. SIMPLE TEST SCENARIO
+
+Default scenario:
+
+```text
+TRACK:
+Spa-inspired circuit
+
+RACE:
+10 laps
+
+START:
+P6
+
+TARGET:
+P5
+
+ENERGY:
+Medium
+
+SCENARIO:
+Balanced
+```
+
+Provide optional scenario buttons:
+
+```text
+Balanced
+Low Energy
+High Counter Risk
+Late Race
+```
+
+Keep the default demo scenario fixed and reproducible.
+
+---
+
+# 19. BASELINE COMPARISON
+
+Do not overwhelm the jury with many metrics.
+
+At the end show only:
+
+```text
+FINAL RESULT
+
+                 BASELINE    TRACKSHIFT
+
+Position            P5           P4
+Overtakes            1            2
+Energy Used        8.8 MJ       7.9 MJ
+Counter Events       1            0
+```
+
+Then a simple message:
+
+```text
+TRACKSHIFT ADVANTAGE
+
++1 POSITION
++1 SUCCESSFUL OVERTAKE
+LOWER ENERGY COST
+```
+
+All values must be calculated from the actual simulation.
+
+Do not hard-code example results.
+
+---
+
+# 20. WHAT THE JURY SHOULD UNDERSTAND
+
+After a 2-minute demo, the jury should understand:
+
+### Problem
+
+```text
+ERS energy is finite.
+An opportunity may appear now,
+but a better opportunity may appear later.
+```
+
+### TrackShift
+
+```text
+TrackShift continuously evaluates
+the current opportunity against
+future opportunities.
+```
+
+### Decision
+
+```text
+It chooses the best feasible
+power deployment instead of using
+a fixed ATTACK/SAVE strategy.
+```
+
+### Result
+
+```text
+The simulation demonstrates
+whether that decision performs
+better than simple strategies.
+```
+
+---
+
+# 21. BACKEND ARCHITECTURE
+
+Keep the backend modular, but don't expose its complexity in the UI.
+
+```text
+TELEMETRY
+    ↓
+STATE ESTIMATOR
+    ↓
+┌───────────────┬────────────────┐
+│               │                │
+ENERGY       OVERTAKE        TRACK ZONE
+MODEL         MODEL             MODEL
+│               │                │
+└───────────────┼────────────────┘
+                ↓
+        FUTURE PREDICTION
+                ↓
+        CANDIDATE CONTROLS
+                ↓
+         CONSTRAINT CHECK
+                ↓
+          OPTIMIZATION
+                ↓
+        BEST CONTROL
+                ↓
+          NEXT STATE
+                ↓
+            REPEAT
+```
+
+This is the actual decision engine.
+
+---
+
+# 22. CANDIDATE ACTIONS
+
+The optimizer should internally evaluate controls such as:
+
+```text
+0 kW
+100 kW
+180 kW
+250 kW
+300 kW
+350 kW
+```
+
+combined with different durations and timing.
+
+The actual candidate set must respect the configured regulation profile.
+
+The optimizer chooses the best feasible control.
+
+Do NOT implement:
+
+```text
+ATTACK
+SAVE
+DEFEND
+```
+
+as the optimization variables.
+
+Those are only UI interpretations.
+
+---
+
+# 23. SIMPLE OPTIMIZATION MODEL
+
+Internally calculate:
+
+```text
+Decision Value =
+
+Position Benefit
++ Overtake Opportunity
+- Counter Risk
+- Energy Cost
++ Future Opportunity Value
++ Future Harvest Value
+- Risk
+```
+
+Use configurable weights.
+
+The important thing is not to make the equation complicated.
+
+The important thing is:
+
+> **The engine must compare immediate benefit against future energy value.**
+
+---
+
+# 24. CONFIGURATION PANEL
+
+Keep advanced parameters hidden under:
+
+```text
+ADVANCED SETTINGS
+```
+
+The default UI should not show them.
+
+Inside:
+
+```text
+Overtake Value
+Counter Risk
+Energy Cost
+Future Opportunity
+Future Harvest
+Position Value
+Risk
+```
+
+Use sliders.
+
+When changed:
+
+```text
+RE-RUN OPTIMIZATION
+```
+
+This allows the jury to experiment without cluttering the main screen.
+
+---
+
+# 25. REGULATION DISPLAY
+
+Do not make FIA rules the center of the interface.
+
+Simply display:
+
+```text
+2026 FIA PROFILE
+ACTIVE ✓
+```
+
+In the Explain Decision page:
+
+```text
+CONSTRAINTS APPLIED
+
+Power Limit       ✓
+Energy Limit      ✓
+Harvest Limit     ✓
+Future Feasibility ✓
+```
+
+The exact regulation values should live in a versioned configuration file.
+
+Never claim full FIA regulatory compliance unless every relevant regulation has actually been implemented.
+
+---
+
+# 26. VISUAL STYLE
+
+The interface must feel like:
+
+> **A professional F1 race engineer's decision screen.**
+
+Not:
+
+> A generic AI SaaS dashboard.
+
+Use:
+
+```text
+Dark background
+White typography
+Red primary action
+Yellow opportunity indicators
+Thin borders
+Minimal cards
+Large numbers
+Clear spacing
+```
+
+Avoid:
+
+```text
+Huge gradients
+Glassmorphism everywhere
+Excessive animations
+Too many cards
+Huge amounts of text
+Multiple unrelated graphs
+Generic AI robot graphics
+```
+
+Use animation only where it improves understanding:
+
+```text
+car movement
+decision change
+energy movement
+race timeline
+```
+
+---
+
+# 27. RESPONSIVE INFORMATION HIERARCHY
+
+The UI must have this hierarchy:
+
+## LEVEL 1 — WHAT IS HAPPENING?
+
+```text
+LAP
+POSITION
+TRACK LOCATION
+ERS
+GAP
+```
+
+## LEVEL 2 — WHAT IS THE OPPORTUNITY?
+
+```text
+OVERTAKE %
+COUNTER RISK
+NEXT OPPORTUNITY
+```
+
+## LEVEL 3 — WHAT SHOULD WE DO?
+
+```text
+DEPLOY / WAIT / HOLD
+POWER
+DURATION
+```
+
+## LEVEL 4 — WHY?
+
+```text
+3–4 reasons
+```
+
+## LEVEL 5 — TECHNICAL PROOF
+
+```text
+candidate controls
+scores
+constraints
+future projection
+```
+
+Level 5 is hidden behind:
+
+```text
+EXPLAIN DECISION
+```
+
+---
+
+# 28. MOST IMPORTANT UI RULE
+
+At any moment the jury should be able to look at the screen and answer:
+
+```text
+WHERE IS THE CAR?
+        ↓
+WHAT IS THE OPPORTUNITY?
+        ↓
+WHAT DOES TRACKSHIFT RECOMMEND?
+        ↓
+WHY?
+```
+
+If a UI element does not help answer one of these questions, remove it from the main screen.
+
+---
+
+# 29. FINAL DEMO FLOW
+
+The ideal hackathon demonstration should be:
+
+### STEP 1
+
+Show the track.
+
+```text
+Player: P6
+Opponent: P5
+Lap: 4
+```
+
+### STEP 2
+
+Press:
+
+```text
+RUN TEST
+```
+
+### STEP 3
+
+The car starts moving.
+
+Telemetry updates.
+
+### STEP 4
+
+An opportunity appears.
+
+```text
+OVERTAKE 68%
+COUNTER 21%
+```
+
+TrackShift says:
+
+```text
+WAIT
+```
+
+### STEP 5
+
+Next opportunity develops.
+
+```text
+OVERTAKE 84%
+COUNTER 15%
+```
+
+TrackShift changes:
+
+```text
+DEPLOY
+286 kW × 1.8 sec
+```
+
+### STEP 6
+
+Click:
+
+```text
+EXPLAIN DECISION
+```
+
+Show that:
+
+```text
+350 kW → rejected
+180 kW → feasible but lower value
+286 kW → selected
+```
+
+### STEP 7
+
+Continue simulation.
+
+Show the actual result.
+
+```text
+P6 → P5
+```
+
+### STEP 8
+
+Finish race.
+
+Show:
+
+```text
+BASELINE vs TRACKSHIFT
+```
+
+### STEP 9
+
+Conclude:
+
+> **TrackShift does not simply ask whether we can overtake. It asks whether using energy for this opportunity is worth more than preserving it for what comes next.**
+
+---
+
+# 30. FINAL PRODUCT DEFINITION
+
+TrackShift is:
+
+> **A simple, explainable F1 energy decision engine that continuously evaluates the current overtaking opportunity against future race opportunities and selects the best feasible ERS deployment.**
+
+The UI must make this idea obvious.
+
+The sophistication belongs inside the engine.
+
+The jury-facing interface should remain:
+
+```text
+CLEAR
+MINIMAL
+VISUAL
+EXPLAINABLE
+DECISION-FOCUSED
+```
+
+Build the product around **one decision at a time**, not around showing every piece of data the system can calculate.
+
     --text-muted: #737c89;
     --font-heading: 'Chakra Petch', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
